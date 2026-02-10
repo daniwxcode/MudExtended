@@ -30,37 +30,37 @@
 
 @code {
     /// <summary>
-    /// Titre de la page (balise title).
+    /// Page title (title tag).
     /// </summary>
     [Parameter, EditorRequired]
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// Titre affich�.
+    /// Displayed header.
     /// </summary>
     [Parameter, EditorRequired]
     public string Header { get; set; } = string.Empty;
 
     /// <summary>
-    /// Sous-titre.
+    /// Subtitle.
     /// </summary>
     [Parameter]
     public string? SubHeader { get; set; }
 
     /// <summary>
-    /// Boutons d'actions.
+    /// Action buttons.
     /// </summary>
     [Parameter]
     public RenderFragment? Actions { get; set; }
 
     /// <summary>
-    /// Contenu additionnel.
+    /// Additional content.
     /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
     /// <summary>
-    /// Classes CSS additionnelles.
+    /// Additional CSS classes.
     /// </summary>
     [Parameter]
     public string? Class { get; set; }

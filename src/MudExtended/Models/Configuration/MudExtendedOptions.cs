@@ -37,6 +37,12 @@ public class MudExtendedOptions
     /// <summary>Tailles de page disponibles.</summary>
     public int[] PageSizeOptions { get; set; } = [10, 25, 50, 100];
 
-    /// <summary>Taille de page par d�faut.</summary>
+    /// <summary>Taille de page par défaut.</summary>
     public int DefaultPageSize { get; set; } = 10;
+
+    /// <summary>
+    /// Active le service de permissions. Nécessite que AuthenticationStateProvider 
+    /// et IAuthorizationService soient enregistrés dans le conteneur de dépendances.
+    /// </summary>
+    public bool UsePermissionService { get; set; } = false;
 }

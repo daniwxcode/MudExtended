@@ -33,55 +33,55 @@
     private MudExtendedOptions Options { get; set; } = default!;
 
     /// <summary>
-    /// Libell� de la statistique.
+    /// Statistic label.
     /// </summary>
     [Parameter, EditorRequired]
     public string Label { get; set; } = string.Empty;
 
     /// <summary>
-    /// Valeur principale.
+    /// Main value.
     /// </summary>
     [Parameter, EditorRequired]
     public object Value { get; set; } = 0;
 
     /// <summary>
-    /// Sous-libell�.
+    /// Sub-label.
     /// </summary>
     [Parameter]
     public string? SubLabel { get; set; }
 
     /// <summary>
-    /// Sous-valeur.
+    /// Sub-value.
     /// </summary>
     [Parameter]
     public object? SubValue { get; set; }
 
     /// <summary>
-    /// Ic�ne Material.
+    /// Material icon.
     /// </summary>
     [Parameter]
     public string Icon { get; set; } = Icons.Material.Filled.Analytics;
 
     /// <summary>
-    /// Couleur.
+    /// Color.
     /// </summary>
     [Parameter]
     public Color Color { get; set; } = Color.Primary;
 
     /// <summary>
-    /// Type de formatage de la valeur.
+    /// Value formatting type.
     /// </summary>
     [Parameter]
     public StatValueType ValueType { get; set; } = StatValueType.Number;
 
     /// <summary>
-    /// �l�vation.
+    /// Elevation.
     /// </summary>
     [Parameter]
     public int Elevation { get; set; } = 2;
 
     /// <summary>
-    /// Classes CSS additionnelles.
+    /// Additional CSS classes.
     /// </summary>
     [Parameter]
     public string? Class { get; set; }
@@ -94,8 +94,8 @@
 
     private string FormatValue(object value, StatValueType type)
     {
-        var culture = Options?.Culture ?? CultureInfo.GetCultureInfo("fr-FR");
-        var currencySymbol = Options?.CurrencySymbol ?? "FCFA";
+        var culture = Options?.Culture ?? CultureInfo.GetCultureInfo("en-US");
+        var currencySymbol = Options?.CurrencySymbol ?? "$";
 
         return type switch
         {

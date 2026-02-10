@@ -30,8 +30,13 @@ public static class ServiceCollectionExtensions
 
         // Services
         services.AddScoped<IApiExecutor, ApiExecutor>();
-        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<LoaderService>();
+
+        // Service de permissions (nécessite AuthenticationStateProvider et IAuthorizationService)
+        if (options.UsePermissionService)
+        {
+            services.AddScoped<IPermissionService, PermissionService>();
+        }
 
         // Registry des mappings
         services.AddSingleton<StatusMappingRegistry>();

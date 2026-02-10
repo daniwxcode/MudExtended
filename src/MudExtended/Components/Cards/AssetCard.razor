@@ -6,32 +6,32 @@
 @inherits AuthorizedComponentBase
 
 <MudCard Elevation="@Elevation" Class="@CombinedClass">
-    @* Header *@
-    <MudCardHeader>
-        @if (HeaderTemplate is not null)
-        {
-            @HeaderTemplate(Asset)
-        }
-    </MudCardHeader>
-
-    @* Body *@
-    <MudCardContent>
-        @if (BodyTemplate is not null)
-        {
-            @BodyTemplate(Asset)
-        }
-    </MudCardContent>
-
-    @* Footer (optionnel) *@
-    @if (FooterTemplate is not null)
+@* Header *@
+<MudCardHeader>
+    @if (HeaderTemplate is not null)
     {
-        <MudCardContent Class="pt-0">
-            @FooterTemplate(Asset)
-        </MudCardContent>
+        @HeaderTemplate(Asset)
     }
+</MudCardHeader>
 
-    @* Actions *@
-    <MudCardActions Class="mudext-card__actions">
+@* Body *@
+<MudCardContent>
+    @if (BodyTemplate is not null)
+    {
+        @BodyTemplate(Asset)
+    }
+</MudCardContent>
+
+@* Footer (optional) *@
+@if (FooterTemplate is not null)
+{
+    <MudCardContent Class="pt-0">
+        @FooterTemplate(Asset)
+    </MudCardContent>
+}
+
+@* Actions *@
+<MudCardActions Class="mudext-card__actions">
         @if (ActionsTemplate is not null)
         {
             @ActionsTemplate(Asset)
@@ -74,121 +74,121 @@
     private Models.Configuration.MudExtendedOptions Options { get; set; } = default!;
 
     /// <summary>
-    /// Bien � afficher.
+    /// Asset to display.
     /// </summary>
     [Parameter, EditorRequired]
     public TAsset Asset { get; set; } = default!;
 
     /// <summary>
-    /// NIF du contribuable.
+    /// Taxpayer identification number.
     /// </summary>
     [Parameter]
     public string? Tin { get; set; }
 
     /// <summary>
-    /// Ressource UMTD pour les permissions.
+    /// Resource name for permissions.
     /// </summary>
     [Parameter, EditorRequired]
     public string ResourceName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Template header.
+    /// Header template.
     /// </summary>
     [Parameter, EditorRequired]
     public RenderFragment<TAsset> HeaderTemplate { get; set; } = default!;
 
     /// <summary>
-    /// Template body.
+    /// Body template.
     /// </summary>
     [Parameter, EditorRequired]
     public RenderFragment<TAsset> BodyTemplate { get; set; } = default!;
 
     /// <summary>
-    /// Template footer.
+    /// Footer template.
     /// </summary>
     [Parameter]
     public RenderFragment<TAsset>? FooterTemplate { get; set; }
 
     /// <summary>
-    /// Actions personnalis�es.
+    /// Custom actions.
     /// </summary>
     [Parameter]
     public RenderFragment<TAsset>? ActionsTemplate { get; set; }
 
     /// <summary>
-    /// Type du dialog d'�dition.
+    /// Edit dialog type.
     /// </summary>
     [Parameter]
     public Type? EditDialogType { get; set; }
 
     /// <summary>
-    /// Type du dialog de d�tails.
+    /// Details dialog type.
     /// </summary>
     [Parameter]
     public Type? DetailsDialogType { get; set; }
 
     /// <summary>
-    /// Fonction de suppression.
+    /// Delete function.
     /// </summary>
     [Parameter]
     public Func<TAsset, Task<bool>>? DeleteFunc { get; set; }
 
     /// <summary>
-    /// Fonction d'extraction de l'ID.
+    /// ID extraction function.
     /// </summary>
     [Parameter]
     public Func<TAsset, object>? IdFunc { get; set; }
 
     /// <summary>
-    /// Classes CSS de la carte.
+    /// Card CSS classes.
     /// </summary>
     [Parameter]
     public string? CardClass { get; set; }
 
     /// <summary>
-    /// �l�vation.
+    /// Elevation.
     /// </summary>
     [Parameter]
     public int Elevation { get; set; } = 3;
 
     /// <summary>
-    /// Afficher bouton �dition.
+    /// Show edit button.
     /// </summary>
     [Parameter]
     public bool ShowEditButton { get; set; } = true;
 
     /// <summary>
-    /// Afficher bouton suppression.
+    /// Show delete button.
     /// </summary>
     [Parameter]
     public bool ShowDeleteButton { get; set; } = true;
 
     /// <summary>
-    /// Afficher bouton d�tails.
+    /// Show details button.
     /// </summary>
     [Parameter]
     public bool ShowDetailsButton { get; set; }
 
     /// <summary>
-    /// �v�nement apr�s action.
+    /// Event after action.
     /// </summary>
     [Parameter]
     public EventCallback OnActionCompleted { get; set; }
 
     /// <summary>
-    /// �v�nement �dition demand�e.
+    /// Edit requested event.
     /// </summary>
     [Parameter]
     public EventCallback<TAsset> OnEdit { get; set; }
 
     /// <summary>
-    /// �v�nement suppression demand�e.
+    /// Delete requested event.
     /// </summary>
     [Parameter]
     public EventCallback<TAsset> OnDelete { get; set; }
 
     /// <summary>
-    /// �v�nement d�tails demand�s.
+    /// Details requested event.
     /// </summary>
     [Parameter]
     public EventCallback<TAsset> OnDetails { get; set; }
@@ -226,7 +226,7 @@
             }
 
             var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
-            var dialog = await DialogService.ShowAsync(EditDialogType, "Modifier", parameters, options);
+            var dialog = await DialogService.ShowAsync(EditDialogType, "Edit", parameters, options);
             var result = await dialog.Result;
 
             if (result is { Canceled: false })
@@ -246,7 +246,7 @@
 
         if (DeleteFunc is not null)
         {
-            var confirmed = await DialogService.ConfirmDeleteAsync("cet �l�ment");
+            var confirmed = await DialogService.ConfirmDeleteAsync("this item");
             if (confirmed)
             {
                 var success = await DeleteFunc(Asset);

@@ -2,7 +2,10 @@
 @using MudExtended.Enums
 
 <MudDialog>
-    <DialogContent>
+<TitleContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+</TitleContent>
+<DialogContent>
         <div class="d-flex flex-column align-center pa-4">
             @if (!string.IsNullOrWhiteSpace(Icon))
             {
@@ -34,62 +37,62 @@
 </MudDialog>
 
 @code {
-    /// <summary>
-    /// Instance du dialog MudBlazor.
-    /// </summary>
-    [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; } = default!;
+/// <summary>
+/// Instance du dialog MudBlazor.
+/// </summary>
+[CascadingParameter]
+private IMudDialogInstance MudDialog { get; set; } = default!;
 
     /// <summary>
-    /// Titre du dialog.
+    /// Dialog title.
     /// </summary>
     [Parameter]
     public string Title { get; set; } = "Confirmation";
 
     /// <summary>
-    /// Message texte.
+    /// Message text.
     /// </summary>
     [Parameter]
     public string? Message { get; set; }
 
     /// <summary>
-    /// Contenu HTML du message.
+    /// HTML message content.
     /// </summary>
     [Parameter]
     public RenderFragment? MessageContent { get; set; }
 
     /// <summary>
-    /// Type de confirmation.
+    /// Confirmation type.
     /// </summary>
     [Parameter]
     public ConfirmationType Type { get; set; } = ConfirmationType.Info;
 
     /// <summary>
-    /// Texte du bouton de confirmation.
+    /// Confirm button text.
     /// </summary>
     [Parameter]
-    public string ConfirmText { get; set; } = "Confirmer";
+    public string ConfirmText { get; set; } = "Confirm";
 
     /// <summary>
-    /// Texte du bouton d'annulation.
+    /// Cancel button text.
     /// </summary>
     [Parameter]
-    public string CancelText { get; set; } = "Annuler";
+    public string CancelText { get; set; } = "Cancel";
 
     /// <summary>
-    /// Ic�ne personnalis�e (auto-d�termin�e si null).
+    /// Custom icon (auto-determined if null).
     /// </summary>
     [Parameter]
     public string? Icon { get; set; }
 
     /// <summary>
-    /// Afficher le bouton d'annulation.
+    /// Show the cancel button.
     /// </summary>
     [Parameter]
     public bool ShowCancelButton { get; set; } = true;
 
     /// <summary>
-    /// D�sactiver le bouton de confirmation.
+    /// Disable the confirm button.
     /// </summary>
     [Parameter]
     public bool ConfirmDisabled { get; set; }
@@ -113,7 +116,7 @@
     /// <inheritdoc/>
     protected override void OnParametersSet()
     {
-        // Auto-d�terminer l'ic�ne si non sp�cifi�e
+        // Auto-determine icon if not specified
         Icon ??= Type switch
         {
             ConfirmationType.Info => Icons.Material.Filled.Info,
@@ -121,9 +124,6 @@
             ConfirmationType.Danger => Icons.Material.Filled.Error,
             _ => Icons.Material.Filled.Help
         };
-
-        // D�finir le titre du dialog
-        MudDialog.SetTitle(Title);
     }
 
     private void Confirm() => MudDialog.Close(DialogResult.Ok(true));

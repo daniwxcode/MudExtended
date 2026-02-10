@@ -24,31 +24,31 @@
     private LoaderService _loaderService { get; set; } = default!;
 
     /// <summary>
-    /// URL du logo � afficher.
+    /// Logo URL to display.
     /// </summary>
     [Parameter]
     public string? LogoUrl { get; set; }
 
     /// <summary>
-    /// Message de chargement.
+    /// Loading message.
     /// </summary>
     [Parameter]
     public string? Message { get; set; }
 
     /// <summary>
-    /// Z-index de l'overlay.
+    /// Overlay z-index.
     /// </summary>
     [Parameter]
     public int ZIndex { get; set; } = 999999;
 
     /// <summary>
-    /// Utiliser un fond clair.
+    /// Use light background.
     /// </summary>
     [Parameter]
     public bool LightBackground { get; set; } = true;
 
     /// <summary>
-    /// Couleur du spinner.
+    /// Spinner color.
     /// </summary>
     [Parameter]
     public Color SpinnerColor { get; set; } = Color.Primary;

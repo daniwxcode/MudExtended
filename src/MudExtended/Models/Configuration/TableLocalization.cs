@@ -1,46 +1,46 @@
 namespace MudExtended.Models.Configuration;
 
 /// <summary>
-/// Textes localis�s pour les tables.
+/// Localized texts for tables.
 /// </summary>
 public record TableLocalization
 {
-    /// <summary>Texte du bouton Ajouter.</summary>
-    public string AddButton { get; init; } = "Ajouter";
+    /// <summary>Add button text.</summary>
+    public string AddButton { get; init; } = "Add";
 
-    /// <summary>Texte du bouton Rafra�chir.</summary>
-    public string RefreshButton { get; init; } = "Rafra�chir";
+    /// <summary>Refresh button text.</summary>
+    public string RefreshButton { get; init; } = "Refresh";
 
-    /// <summary>Placeholder du champ de recherche.</summary>
-    public string SearchPlaceholder { get; init; } = "Rechercher...";
+    /// <summary>Search field placeholder.</summary>
+    public string SearchPlaceholder { get; init; } = "Search...";
 
-    /// <summary>Titre de la colonne Actions.</summary>
+    /// <summary>Actions column title.</summary>
     public string ActionsColumn { get; init; } = "Actions";
 
-    /// <summary>Texte de l'action Modifier.</summary>
-    public string EditAction { get; init; } = "Modifier";
+    /// <summary>Edit action text.</summary>
+    public string EditAction { get; init; } = "Edit";
 
-    /// <summary>Texte de l'action Supprimer.</summary>
-    public string DeleteAction { get; init; } = "Supprimer";
+    /// <summary>Delete action text.</summary>
+    public string DeleteAction { get; init; } = "Delete";
 
-    /// <summary>Texte de l'action D�tails.</summary>
-    public string DetailsAction { get; init; } = "D�tails";
+    /// <summary>Details action text.</summary>
+    public string DetailsAction { get; init; } = "Details";
 
-    /// <summary>Message lorsque la liste est vide.</summary>
-    public string NoRecordsMessage { get; init; } = "Aucun �l�ment trouv�";
+    /// <summary>Message when list is empty.</summary>
+    public string NoRecordsMessage { get; init; } = "No records found";
 
-    /// <summary>Message de chargement.</summary>
-    public string LoadingMessage { get; init; } = "Chargement...";
+    /// <summary>Loading message.</summary>
+    public string LoadingMessage { get; init; } = "Loading...";
 
-    /// <summary>Libell� pour les lignes par page.</summary>
-    public string RowsPerPage { get; init; } = "Lignes par page:";
+    /// <summary>Rows per page label.</summary>
+    public string RowsPerPage { get; init; } = "Rows per page:";
 
-    /// <summary>Format de pagination (utilise {first_item}, {last_item}, {all_items}).</summary>
-    public string PaginationFormat { get; init; } = "{first_item}-{last_item} sur {all_items}";
+    /// <summary>Pagination format (uses {first_item}, {last_item}, {all_items}).</summary>
+    public string PaginationFormat { get; init; } = "{first_item}-{last_item} of {all_items}";
 
-    /// <summary>Titre du dialog de confirmation de suppression.</summary>
-    public string ConfirmDeleteTitle { get; init; } = "Confirmer la suppression";
+    /// <summary>Delete confirmation dialog title.</summary>
+    public string ConfirmDeleteTitle { get; init; } = "Confirm Deletion";
 
-    /// <summary>Message du dialog de confirmation de suppression.</summary>
-    public string ConfirmDeleteMessage { get; init; } = "Voulez-vous vraiment supprimer cet �l�ment ?";
+    /// <summary>Delete confirmation dialog message.</summary>
+    public string ConfirmDeleteMessage { get; init; } = "Are you sure you want to delete this item?";
 }

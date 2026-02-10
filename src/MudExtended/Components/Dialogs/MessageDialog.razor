@@ -2,7 +2,10 @@
 @using MudExtended.Enums
 
 <MudDialog>
-    <DialogContent>
+<TitleContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+</TitleContent>
+<DialogContent>
         <div class="d-flex gap-4 pa-4">
             @if (ShowIcon)
             {
@@ -39,68 +42,68 @@
 </MudDialog>
 
 @code {
-    /// <summary>
-    /// Instance du dialog MudBlazor.
-    /// </summary>
-    [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; } = default!;
+/// <summary>
+/// MudBlazor dialog instance.
+/// </summary>
+[CascadingParameter]
+private IMudDialogInstance MudDialog { get; set; } = default!;
 
     /// <summary>
-    /// Titre du dialog.
+    /// Dialog title.
     /// </summary>
     [Parameter]
     public string Title { get; set; } = "Message";
 
     /// <summary>
-    /// Message principal.
+    /// Main message.
     /// </summary>
     [Parameter]
     public string? Message { get; set; }
 
     /// <summary>
-    /// Message secondaire (d�tails).
+    /// Secondary message (details).
     /// </summary>
     [Parameter]
     public string? SecondaryMessage { get; set; }
 
     /// <summary>
-    /// Contenu HTML du message.
+    /// HTML message content.
     /// </summary>
     [Parameter]
     public RenderFragment? MessageContent { get; set; }
 
     /// <summary>
-    /// S�v�rit� du message.
+    /// Message severity.
     /// </summary>
     [Parameter]
     public MessageSeverity Severity { get; set; } = MessageSeverity.Info;
 
     /// <summary>
-    /// Texte du bouton OK.
+    /// OK button text.
     /// </summary>
     [Parameter]
     public string OkText { get; set; } = "OK";
 
     /// <summary>
-    /// Texte du bouton Annuler.
+    /// Cancel button text.
     /// </summary>
     [Parameter]
-    public string CancelText { get; set; } = "Annuler";
+    public string CancelText { get; set; } = "Cancel";
 
     /// <summary>
-    /// Afficher l'ic�ne.
+    /// Show icon.
     /// </summary>
     [Parameter]
     public bool ShowIcon { get; set; } = true;
 
     /// <summary>
-    /// Afficher le bouton Annuler.
+    /// Show cancel button.
     /// </summary>
     [Parameter]
     public bool ShowCancelButton { get; set; }
 
     /// <summary>
-    /// Ic�ne personnalis�e (auto-d�termin�e si null).
+    /// Custom icon (auto-determined if null).
     /// </summary>
     [Parameter]
     public string? Icon { get; set; }
@@ -131,12 +134,6 @@
         MessageSeverity.Error => Color.Error,
         _ => Color.Primary
     };
-
-    /// <inheritdoc/>
-    protected override void OnParametersSet()
-    {
-        MudDialog.SetTitle(Title);
-    }
 
     private void Close() => MudDialog.Close(DialogResult.Ok(true));
 

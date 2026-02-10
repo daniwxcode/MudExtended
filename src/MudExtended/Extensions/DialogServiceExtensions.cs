@@ -5,29 +5,29 @@ using MudExtended.Enums;
 namespace MudExtended.Extensions;
 
 /// <summary>
-/// Extensions pour IDialogService.
+/// Extensions for IDialogService.
 /// </summary>
 public static class DialogServiceExtensions
 {
     #region Confirmation Dialogs
 
     /// <summary>
-    /// Affiche un dialog de confirmation et retourne le r�sultat.
+    /// Shows a confirmation dialog and returns the result.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message de confirmation.</param>
-    /// <param name="title">Titre du dialog.</param>
-    /// <param name="type">Type de confirmation.</param>
-    /// <param name="confirmText">Texte du bouton de confirmation.</param>
-    /// <param name="cancelText">Texte du bouton d'annulation.</param>
-    /// <returns>True si confirm�.</returns>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Confirmation message.</param>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="type">Confirmation type.</param>
+    /// <param name="confirmText">Confirm button text.</param>
+    /// <param name="cancelText">Cancel button text.</param>
+    /// <returns>True if confirmed.</returns>
     public static async Task<bool> ConfirmAsync(
         this IDialogService dialogService,
         string message,
         string title = "Confirmation",
         ConfirmationType type = ConfirmationType.Info,
-        string confirmText = "Confirmer",
-        string cancelText = "Annuler")
+        string confirmText = "Confirm",
+        string cancelText = "Cancel")
     {
         var parameters = new DialogParameters<ConfirmationDialog>
         {
@@ -54,69 +54,69 @@ public static class DialogServiceExtensions
     }
 
     /// <summary>
-    /// Affiche un dialog de confirmation de suppression.
+    /// Shows a delete confirmation dialog.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="itemName">Nom de l'�l�ment � supprimer.</param>
-    /// <param name="customMessage">Message personnalis� optionnel.</param>
-    /// <returns>True si confirm�.</returns>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="itemName">Name of the item to delete.</param>
+    /// <param name="customMessage">Optional custom message.</param>
+    /// <returns>True if confirmed.</returns>
     public static Task<bool> ConfirmDeleteAsync(
         this IDialogService dialogService,
         string itemName,
         string? customMessage = null)
     {
-        var message = customMessage ?? $"Voulez-vous vraiment supprimer {itemName} ? Cette action est irr�versible.";
+        var message = customMessage ?? $"Are you sure you want to delete {itemName}? This action cannot be undone.";
         
         return dialogService.ConfirmAsync(
             message,
-            "Confirmer la suppression",
+            "Confirm Deletion",
             ConfirmationType.Danger,
-            "Supprimer",
-            "Annuler");
+            "Delete",
+            "Cancel");
     }
 
     /// <summary>
-    /// Affiche un dialog de confirmation d'action dangereuse.
+    /// Shows a danger confirmation dialog.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message d'avertissement.</param>
-    /// <param name="title">Titre du dialog.</param>
-    /// <param name="confirmText">Texte du bouton de confirmation.</param>
-    /// <returns>True si confirm�.</returns>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Warning message.</param>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="confirmText">Confirm button text.</param>
+    /// <returns>True if confirmed.</returns>
     public static Task<bool> ConfirmDangerAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Attention",
-        string confirmText = "Continuer")
+        string title = "Warning",
+        string confirmText = "Continue")
     {
         return dialogService.ConfirmAsync(
             message,
             title,
             ConfirmationType.Danger,
             confirmText,
-            "Annuler");
+            "Cancel");
     }
 
     /// <summary>
-    /// Affiche un dialog d'avertissement avec confirmation.
+    /// Shows a warning confirmation dialog.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message d'avertissement.</param>
-    /// <param name="title">Titre du dialog.</param>
-    /// <param name="confirmText">Texte du bouton de confirmation.</param>
-    /// <returns>True si confirm�.</returns>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Warning message.</param>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="confirmText">Confirm button text.</param>
+    /// <returns>True if confirmed.</returns>
     public static Task<bool> ConfirmWarningAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Avertissement",
-        string confirmText = "Continuer")
+        string title = "Warning",
+        string confirmText = "Continue")
     {
         return dialogService.ConfirmAsync(
             message,
             title,
             ConfirmationType.Warning,
             confirmText,
-            "Annuler");
+            "Cancel");
     }
 
     #endregion
@@ -124,13 +124,13 @@ public static class DialogServiceExtensions
     #region Message Dialogs
 
     /// <summary>
-    /// Affiche une bo�te de message.
+    /// Shows a message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
-    /// <param name="severity">S�v�rit� du message.</param>
-    /// <param name="okText">Texte du bouton OK.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="severity">Message severity.</param>
+    /// <param name="okText">OK button text.</param>
     public static async Task ShowMessageAsync(
         this IDialogService dialogService,
         string message,
@@ -161,11 +161,11 @@ public static class DialogServiceExtensions
     }
 
     /// <summary>
-    /// Affiche une bo�te de message d'information.
+    /// Shows an information message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
     public static Task ShowInfoAsync(
         this IDialogService dialogService,
         string message,
@@ -175,59 +175,59 @@ public static class DialogServiceExtensions
     }
 
     /// <summary>
-    /// Affiche une bo�te de message de succ�s.
+    /// Shows a success message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
     public static Task ShowSuccessAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Succ�s")
+        string title = "Success")
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Success);
     }
 
     /// <summary>
-    /// Affiche une bo�te de message d'avertissement.
+    /// Shows a warning message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
     public static Task ShowWarningAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Avertissement")
+        string title = "Warning")
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Warning);
     }
 
     /// <summary>
-    /// Affiche une bo�te de message d'erreur.
+    /// Shows an error message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
     public static Task ShowErrorAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Erreur")
+        string title = "Error")
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Error);
     }
 
     /// <summary>
-    /// Affiche une bo�te de message d'erreur avec d�tails.
+    /// Shows an error message box with details.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message principal.</param>
-    /// <param name="details">D�tails de l'erreur.</param>
-    /// <param name="title">Titre du dialog.</param>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Main message.</param>
+    /// <param name="details">Error details.</param>
+    /// <param name="title">Dialog title.</param>
     public static async Task ShowErrorWithDetailsAsync(
         this IDialogService dialogService,
         string message,
         string details,
-        string title = "Erreur")
+        string title = "Error")
     {
         var parameters = new DialogParameters<MessageDialog>
         {
@@ -253,13 +253,13 @@ public static class DialogServiceExtensions
     }
 
     /// <summary>
-    /// Affiche une bo�te de message avec choix Oui/Non.
+    /// Shows a Yes/No message box.
     /// </summary>
-    /// <param name="dialogService">Service de dialog.</param>
-    /// <param name="message">Message � afficher.</param>
-    /// <param name="title">Titre du dialog.</param>
-    /// <param name="severity">S�v�rit� du message.</param>
-    /// <returns>True si Oui, False si Non.</returns>
+    /// <param name="dialogService">Dialog service.</param>
+    /// <param name="message">Message to display.</param>
+    /// <param name="title">Dialog title.</param>
+    /// <param name="severity">Message severity.</param>
+    /// <returns>True if Yes, False if No.</returns>
     public static async Task<bool> ShowYesNoAsync(
         this IDialogService dialogService,
         string message,
@@ -271,8 +271,8 @@ public static class DialogServiceExtensions
             { x => x.Title, title },
             { x => x.Message, message },
             { x => x.Severity, severity },
-            { x => x.OkText, "Oui" },
-            { x => x.CancelText, "Non" },
+            { x => x.OkText, "Yes" },
+            { x => x.CancelText, "No" },
             { x => x.ShowCancelButton, true }
         };
 

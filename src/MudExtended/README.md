@@ -7,25 +7,25 @@
 
 **MudExtended** is a powerful extension library for [MudBlazor](https://mudblazor.com/) that provides reusable components for common enterprise patterns like CRUD tables, dialogs, status badges, loading states, and SignalR integration.
 
-## ? Features
+## Features
 
-- ??? **Server-side paginated tables** with search, sorting, and CRUD actions
-- ?? **Generic form dialogs** for create/edit operations
-- ? **Confirmation dialogs** with severity levels
-- ?? **Message dialogs** (Info, Success, Warning, Error)
-- ??? **Status badges** with customizable mappings
-- ? **Loading skeletons** with multiple layouts
-- ?? **Authorization-aware components** with permission sets
-- ?? **SignalR integration** for real-time updates
-- ?? **Stat cards** for dashboards
+- **Server-side paginated tables** with search, sorting, and CRUD actions
+- **Generic form dialogs** for create/edit operations
+- **Confirmation dialogs** with severity levels
+- **Message dialogs** (Info, Success, Warning, Error)
+- **Status badges** with customizable mappings
+- **Loading skeletons** with multiple layouts
+- **Authorization-aware components** with permission sets
+- **SignalR integration** for real-time updates
+- **Stat cards** for dashboards
 
-## ?? Installation
+## Installation
 
 ```bash
 dotnet add package MudExtended
 ```
 
-## ?? Configuration
+## Configuration
 
 ### 1. Program.cs
 
@@ -74,7 +74,7 @@ builder.Services.AddMudExtended(options =>
 @using MudExtended.Extensions
 ```
 
-## ?? Components
+## Components
 
 ### Tables
 
@@ -124,7 +124,7 @@ builder.Services.AddMudExtended(options =>
 |-----------|-------------|
 | `SignalRSubscriber` | Simplified SignalR subscription |
 
-## ?? Usage Examples
+## Usage Examples
 
 ### PaginatedServerTable
 
@@ -240,7 +240,7 @@ if (await DialogService.ShowYesNoAsync("Save changes before closing?"))
 }
 ```
 
-## ?? Services
+## Services
 
 ### IApiExecutor
 
@@ -275,7 +275,7 @@ var result = await Loader.WithLoadingAsync(async ct =>
     await ApiClient.GetDataAsync(ct));
 ```
 
-## ?? Customization
+## Customization
 
 ### Status Mapping Provider
 
@@ -337,7 +337,7 @@ builder.Services.AddMudExtended(options =>
 });
 ```
 
-## ?? Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -347,11 +347,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## ?? License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## ?? Acknowledgments
+## Acknowledgments
 
 - [MudBlazor](https://mudblazor.com/) - The amazing Blazor component library this extends
 - All contributors who help improve this library

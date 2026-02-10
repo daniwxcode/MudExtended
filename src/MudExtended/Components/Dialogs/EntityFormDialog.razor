@@ -5,19 +5,22 @@
 @typeparam TUpdateCommand
 
 <MudDialog>
-    <DialogContent>
+<TitleContent>
+    <MudText Typo="Typo.h6">@ComputedTitle</MudText>
+</TitleContent>
+<DialogContent>
         @if (_isLoading)
         {
             <div class="d-flex flex-column align-center pa-8">
                 <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.body2" Class="mt-4">Chargement...</MudText>
+                <MudText Typo="Typo.body2" Class="mt-4">Loading...</MudText>
             </div>
         }
         else if (_isSaving)
         {
             <div class="d-flex flex-column align-center pa-8">
                 <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.body2" Class="mt-4">Enregistrement...</MudText>
+                <MudText Typo="Typo.body2" Class="mt-4">Saving...</MudText>
             </div>
         }
         else
@@ -39,7 +42,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel" Variant="Variant.Text" Disabled="@_isSaving">
-            Annuler
+            Cancel
         </MudButton>
         <MudButton OnClick="Submit" 
                    Variant="Variant.Filled" 
@@ -51,8 +54,8 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; } = default!;
+[CascadingParameter]
+private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
@@ -63,103 +66,103 @@
     #region Parameters
 
     /// <summary>
-    /// Mode cr�ation ou �dition.
+    /// Create or edit mode.
     /// </summary>
     [Parameter, EditorRequired]
     public bool IsCreate { get; set; }
 
     /// <summary>
-    /// Entit� � �diter (mode �dition).
+    /// Entity to edit (edit mode).
     /// </summary>
     [Parameter]
     public TEntity? Entity { get; set; }
 
     /// <summary>
-    /// ID de l'entit� (mode �dition).
+    /// Entity ID (edit mode).
     /// </summary>
     [Parameter]
     public object? EntityId { get; set; }
 
     /// <summary>
-    /// Fonction de cr�ation.
+    /// Create function.
     /// </summary>
     [Parameter, EditorRequired]
     public Func<TCreateCommand, Task<TEntity>> CreateFunc { get; set; } = default!;
 
     /// <summary>
-    /// Fonction de mise � jour.
+    /// Update function.
     /// </summary>
     [Parameter, EditorRequired]
     public Func<object, TUpdateCommand, Task<TEntity>> UpdateFunc { get; set; } = default!;
 
     /// <summary>
-    /// Factory pour cr�er une commande de cr�ation.
+    /// Factory to create a create command.
     /// </summary>
     [Parameter, EditorRequired]
     public Func<TCreateCommand> MapToCreate { get; set; } = default!;
 
     /// <summary>
-    /// Mapper entit� vers commande de mise � jour.
+    /// Map entity to update command.
     /// </summary>
     [Parameter, EditorRequired]
     public Func<TEntity, TUpdateCommand> MapToUpdate { get; set; } = default!;
 
     /// <summary>
-    /// Contenu du formulaire.
+    /// Form content.
     /// </summary>
     [Parameter, EditorRequired]
     public RenderFragment<object> FormContent { get; set; } = default!;
 
     /// <summary>
-    /// Titre du dialog (auto-g�n�r� si null).
+    /// Dialog title (auto-generated if null).
     /// </summary>
     [Parameter]
     public string? Title { get; set; }
 
     /// <summary>
-    /// Pr�fixe titre cr�ation.
+    /// Create title prefix.
     /// </summary>
     [Parameter]
-    public string CreateTitle { get; set; } = "Cr�er";
+    public string CreateTitle { get; set; } = "Create";
 
     /// <summary>
-    /// Pr�fixe titre �dition.
+    /// Edit title prefix.
     /// </summary>
     [Parameter]
-    public string EditTitle { get; set; } = "Modifier";
+    public string EditTitle { get; set; } = "Edit";
 
     /// <summary>
-    /// Nom de l'entit� pour le titre.
+    /// Entity name for title.
     /// </summary>
     [Parameter]
     public string EntityName { get; set; } = "";
 
     /// <summary>
-    /// Message de succ�s.
+    /// Success message.
     /// </summary>
     [Parameter]
     public string? SuccessMessage { get; set; }
 
     /// <summary>
-    /// Texte du bouton de cr�ation.
+    /// Create button text.
     /// </summary>
     [Parameter]
-    public string CreateButtonText { get; set; } = "Cr�er";
+    public string CreateButtonText { get; set; } = "Create";
 
     /// <summary>
-    /// Texte du bouton de mise � jour.
+    /// Update button text.
     /// </summary>
     [Parameter]
-    public string UpdateButtonText { get; set; } = "Enregistrer";
+    public string UpdateButtonText { get; set; } = "Save";
 
     /// <summary>
-    /// �v�nement apr�s sauvegarde r�ussie.
+    /// Event after successful save.
     /// </summary>
     [Parameter]
     public EventCallback<TEntity?> OnSuccess { get; set; }
 
     /// <summary>
-    /// �v�nement d'annulation.
+    /// Cancel event.
     /// </summary>
     [Parameter]
     public EventCallback OnCancel { get; set; }
@@ -177,11 +180,27 @@
 
     #endregion
 
+    /// <summary>
+    /// Computed dialog title.
+    /// </summary>
+    private string ComputedTitle
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(Title))
+                return Title;
+
+            var prefix = IsCreate ? CreateTitle : EditTitle;
+            return string.IsNullOrWhiteSpace(EntityName)
+                ? prefix
+                : $"{prefix} {EntityName}";
+        }
+    }
+
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
         InitializeModel();
-        SetDialogTitle();
     }
 
     private void InitializeModel()
@@ -194,19 +213,6 @@
         {
             _currentModel = MapToUpdate(Entity);
         }
-    }
-
-    private void SetDialogTitle()
-    {
-        var title = Title;
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            var prefix = IsCreate ? CreateTitle : EditTitle;
-            title = string.IsNullOrWhiteSpace(EntityName) 
-                ? prefix 
-                : $"{prefix} {EntityName}";
-        }
-        MudDialog.SetTitle(title);
     }
 
     private async Task Submit()
