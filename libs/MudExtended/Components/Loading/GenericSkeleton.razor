@@ -1,0 +1,220 @@
+@using MudBlazor
+@using MudExtended.Enums
+
+<div class="@CombinedClass">
+    @switch (Layout)
+    {
+        case SkeletonLayout.Card:
+            <MudCard Elevation="2" Class="mudext-skeleton-card">
+                <MudCardContent>
+                    <MudSkeleton Animation="Animation" Width="60%" Height="24px" Class="mb-2" />
+                    <MudSkeleton Animation="Animation" Width="100%" Height="16px" Class="mb-1" />
+                    <MudSkeleton Animation="Animation" Width="80%" Height="16px" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+                    <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" Class="ml-2" />
+                </MudCardActions>
+            </MudCard>
+            break;
+
+        case SkeletonLayout.CardGrid:
+            <MudGrid Spacing="4">
+                @for (var i = 0; i < Count; i++)
+                {
+                    <MudItem xs="12" sm="@(12 / Math.Min(Columns, 4))" md="@(12 / Columns)">
+                        <MudCard Elevation="2" Class="mudext-skeleton-card">
+                            <MudCardContent>
+                                <MudSkeleton Animation="Animation" Width="60%" Height="24px" Class="mb-2" />
+                                <MudSkeleton Animation="Animation" Width="100%" Height="16px" Class="mb-1" />
+                                <MudSkeleton Animation="Animation" Width="80%" Height="16px" />
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="36px" Height="36px" />
+                                <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="36px" Height="36px" Class="ml-2" />
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+            break;
+
+        case SkeletonLayout.Table:
+            <MudPaper Elevation="0" Class="pa-4">
+                @if (ShowSearch)
+                {
+                    <div class="d-flex justify-space-between mb-4">
+                        <MudSkeleton Animation="Animation" Width="200px" Height="40px" />
+                        <MudSkeleton Animation="Animation" Width="120px" Height="40px" />
+                    </div>
+                }
+                @if (ShowHeader)
+                {
+                    <div class="d-flex gap-2 mb-2 pa-2" style="background-color: var(--mud-palette-background-grey);">
+                        @for (var col = 0; col < TableColumns; col++)
+                        {
+                            <MudSkeleton Animation="Animation" Width="@($"{100 / TableColumns}%")" Height="20px" />
+                        }
+                    </div>
+                }
+                @for (var row = 0; row < TableRows; row++)
+                {
+                    <div class="d-flex gap-2 pa-2" style="border-bottom: 1px solid var(--mud-palette-divider);">
+                        @for (var col = 0; col < TableColumns; col++)
+                        {
+                            <MudSkeleton Animation="Animation" Width="@($"{100 / TableColumns}%")" Height="16px" />
+                        }
+                    </div>
+                }
+                @if (ShowFooter)
+                {
+                    <div class="d-flex justify-end mt-4 gap-2">
+                        <MudSkeleton Animation="Animation" Width="100px" Height="32px" />
+                        <MudSkeleton Animation="Animation" Width="150px" Height="32px" />
+                    </div>
+                }
+            </MudPaper>
+            break;
+
+        case SkeletonLayout.Form:
+            <MudPaper Elevation="0" Class="pa-4">
+                @for (var i = 0; i < Count; i++)
+                {
+                    <div class="mb-4">
+                        <MudSkeleton Animation="Animation" Width="120px" Height="14px" Class="mb-1" />
+                        <MudSkeleton Animation="Animation" Width="100%" Height="40px" />
+                    </div>
+                }
+                <div class="d-flex justify-end gap-2 mt-4">
+                    <MudSkeleton Animation="Animation" Width="100px" Height="40px" />
+                    <MudSkeleton Animation="Animation" Width="100px" Height="40px" />
+                </div>
+            </MudPaper>
+            break;
+
+        case SkeletonLayout.FormDialog:
+            <div class="d-flex flex-column align-center pa-8">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                <MudSkeleton Animation="Animation" Width="150px" Height="20px" Class="mt-4" />
+            </div>
+            break;
+
+        case SkeletonLayout.List:
+            <MudList T="string" Dense="true">
+                @for (var i = 0; i < Count; i++)
+                {
+                    <MudListItem T="string">
+                        <div class="d-flex align-center gap-2">
+                            <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="40px" Height="40px" />
+                            <div class="flex-grow-1">
+                                <MudSkeleton Animation="Animation" Width="60%" Height="16px" Class="mb-1" />
+                                <MudSkeleton Animation="Animation" Width="40%" Height="14px" />
+                            </div>
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+            break;
+
+        case SkeletonLayout.Dashboard:
+            <MudGrid Spacing="4">
+                @for (var i = 0; i < Count; i++)
+                {
+                    <MudItem xs="12" sm="6" md="@(12 / Math.Min(Count, 4))">
+                        <MudPaper Elevation="2" Class="pa-4">
+                            <div class="d-flex align-center gap-4">
+                                <MudSkeleton Animation="Animation" SkeletonType="SkeletonType.Circle" Width="48px" Height="48px" />
+                                <div class="flex-grow-1">
+                                    <MudSkeleton Animation="Animation" Width="40%" Height="14px" Class="mb-2" />
+                                    <MudSkeleton Animation="Animation" Width="60%" Height="28px" />
+                                </div>
+                            </div>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+            break;
+
+        case SkeletonLayout.Custom:
+            @if (ItemTemplate is not null)
+            {
+                @for (var i = 0; i < Count; i++)
+                {
+                    @ItemTemplate
+                }
+            }
+            break;
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Type de layout.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public SkeletonLayout Layout { get; set; }
+
+    /// <summary>
+    /// Nombre d'�l�ments.
+    /// </summary>
+    [Parameter]
+    public int Count { get; set; } = 3;
+
+    /// <summary>
+    /// Nombre de colonnes pour CardGrid.
+    /// </summary>
+    [Parameter]
+    public int Columns { get; set; } = 3;
+
+    /// <summary>
+    /// Nombre de colonnes pour Table.
+    /// </summary>
+    [Parameter]
+    public int TableColumns { get; set; } = 5;
+
+    /// <summary>
+    /// Nombre de lignes pour Table.
+    /// </summary>
+    [Parameter]
+    public int TableRows { get; set; } = 5;
+
+    /// <summary>
+    /// Afficher le header skeleton.
+    /// </summary>
+    [Parameter]
+    public bool ShowHeader { get; set; } = true;
+
+    /// <summary>
+    /// Afficher le search skeleton.
+    /// </summary>
+    [Parameter]
+    public bool ShowSearch { get; set; }
+
+    /// <summary>
+    /// Afficher le footer skeleton.
+    /// </summary>
+    [Parameter]
+    public bool ShowFooter { get; set; }
+
+    /// <summary>
+    /// Type d'animation.
+    /// </summary>
+    [Parameter]
+    public Animation Animation { get; set; } = Animation.Wave;
+
+    /// <summary>
+    /// Template personnalis� pour layout Custom.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ItemTemplate { get; set; }
+
+    /// <summary>
+    /// Classes CSS additionnelles.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(Class) 
+        ? "mudext-skeleton" 
+        : $"mudext-skeleton {Class}";
+}

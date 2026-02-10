@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Éléments de solution/">
+    <File Path="cahier de charges.md" />
+  </Folder>
+  <Project Path="libs/UMTD.Blazor.UI/UMTD.Blazor.UI.csproj" />
+</Solution>

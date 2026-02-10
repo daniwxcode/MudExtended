@@ -1,0 +1,136 @@
+@using MudBlazor
+@using MudExtended.Mappings
+@typeparam TStatus where TStatus : Enum
+
+<MudChip T="string"
+         Color="@_color"
+         Size="@Size"
+         Variant="@Variant"
+         Class="@CombinedClass">
+    @if (ShowIcon && !string.IsNullOrWhiteSpace(_icon))
+    {
+        <MudIcon Icon="@_icon" Size="@IconSize" Class="mr-1" />
+    }
+    @if (ShowLabel)
+    {
+        @_label
+    }
+</MudChip>
+
+@code {
+    [Inject]
+    private StatusMappingRegistry Registry { get; set; } = default!;
+
+    /// <summary>
+    /// Valeur du statut.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public TStatus Status { get; set; } = default!;
+
+    /// <summary>
+    /// Taille du chip.
+    /// </summary>
+    [Parameter]
+    public Size Size { get; set; } = Size.Small;
+
+    /// <summary>
+    /// Afficher l'ic�ne.
+    /// </summary>
+    [Parameter]
+    public bool ShowIcon { get; set; } = true;
+
+    /// <summary>
+    /// Afficher le libell�.
+    /// </summary>
+    [Parameter]
+    public bool ShowLabel { get; set; } = true;
+
+    /// <summary>
+    /// Variante MudBlazor.
+    /// </summary>
+    [Parameter]
+    public Variant Variant { get; set; } = Variant.Filled;
+
+    /// <summary>
+    /// Classes CSS additionnelles.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Provider de mapping personnalis� (optionnel, sinon utilise le registry).
+    /// </summary>
+    [Parameter]
+    public IStatusMappingProvider<TStatus>? Provider { get; set; }
+
+    private Color _color = Color.Default;
+    private string _icon = string.Empty;
+    private string _label = string.Empty;
+    private string? _cssClass;
+
+    private Size IconSize => Size switch
+    {
+        Size.Small => Size.Small,
+        Size.Medium => Size.Small,
+        Size.Large => Size.Medium,
+        _ => Size.Small
+    };
+
+    private string CombinedClass
+    {
+        get
+        {
+            var classes = new List<string> { "mudext-status-badge" };
+            
+            classes.Add(Size switch
+            {
+                Size.Small => "mudext-status-badge--small",
+                Size.Medium => "mudext-status-badge--medium",
+                _ => "mudext-status-badge--small"
+            });
+
+            if (!string.IsNullOrWhiteSpace(_cssClass))
+                classes.Add(_cssClass);
+            
+            if (!string.IsNullOrWhiteSpace(Class))
+                classes.Add(Class);
+
+            return string.Join(" ", classes);
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        UpdateMappings();
+    }
+
+    private void UpdateMappings()
+    {
+        var provider = Provider ?? GetProviderFromRegistry();
+        
+        if (provider is not null)
+        {
+            _color = provider.GetColor(Status);
+            _icon = provider.GetIcon(Status);
+            _label = provider.GetLabel(Status);
+            _cssClass = provider.GetCssClass(Status);
+        }
+        else
+        {
+            // Fallback si pas de provider
+            _color = Color.Default;
+            _icon = Icons.Material.Filled.Help;
+            _label = Status.ToString();
+            _cssClass = null;
+        }
+    }
+
+    private IStatusMappingProvider<TStatus>? GetProviderFromRegistry()
+    {
+        if (Registry.TryGet<TStatus>(out var provider))
+            return provider;
+
+        return null;
+    }
+}

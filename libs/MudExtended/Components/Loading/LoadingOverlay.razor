@@ -1,0 +1,78 @@
+@using MudBlazor
+@using MudExtended.Services.Loading
+@implements IDisposable
+
+@if (_loaderService.IsLoading && !_loaderService.IsGlobalOverlayDisabled)
+{
+    <div class="@OverlayClass" style="z-index: @ZIndex;">
+        <div class="mudext-loading-overlay__content">
+            @if (!string.IsNullOrWhiteSpace(LogoUrl))
+            {
+                <img src="@LogoUrl" alt="Logo" class="mudext-loading-overlay__logo" />
+            }
+            <MudProgressCircular Indeterminate="true" Color="@SpinnerColor" Size="Size.Large" />
+            @if (!string.IsNullOrWhiteSpace(Message))
+            {
+                <MudText Typo="Typo.body1" Color="@TextColor">@Message</MudText>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Inject]
+    private LoaderService _loaderService { get; set; } = default!;
+
+    /// <summary>
+    /// URL du logo � afficher.
+    /// </summary>
+    [Parameter]
+    public string? LogoUrl { get; set; }
+
+    /// <summary>
+    /// Message de chargement.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Z-index de l'overlay.
+    /// </summary>
+    [Parameter]
+    public int ZIndex { get; set; } = 999999;
+
+    /// <summary>
+    /// Utiliser un fond clair.
+    /// </summary>
+    [Parameter]
+    public bool LightBackground { get; set; } = true;
+
+    /// <summary>
+    /// Couleur du spinner.
+    /// </summary>
+    [Parameter]
+    public Color SpinnerColor { get; set; } = Color.Primary;
+
+    private string OverlayClass => LightBackground 
+        ? "mudext-loading-overlay mudext-loading-overlay--light" 
+        : "mudext-loading-overlay mudext-loading-overlay--dark";
+
+    private Color TextColor => LightBackground ? Color.Dark : Color.Surface;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        _loaderService.OnChange += OnLoaderStateChanged;
+    }
+
+    private void OnLoaderStateChanged(object? sender, EventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _loaderService.OnChange -= OnLoaderStateChanged;
+    }
+}

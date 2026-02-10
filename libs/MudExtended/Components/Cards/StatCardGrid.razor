@@ -1,0 +1,48 @@
+@using MudBlazor
+@using MudExtended.Models.Status
+
+<MudGrid Spacing="@Spacing" Class="@Class">
+    @foreach (var card in Cards)
+    {
+        <MudItem xs="12" sm="6" md="@GetColumnSize(Cards.Count)">
+            <StatCard Label="@card.Label"
+                      Value="@card.Value"
+                      SubLabel="@card.SubLabel"
+                      SubValue="@card.SubValue"
+                      Icon="@card.Icon"
+                      Color="@card.Color"
+                      ValueType="@card.ValueType"
+                      Elevation="@card.Elevation"
+                      Class="@card.Class" />
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    /// <summary>
+    /// Liste des cartes � afficher.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<StatCardData> Cards { get; set; } = [];
+
+    /// <summary>
+    /// Espacement entre les cartes.
+    /// </summary>
+    [Parameter]
+    public int Spacing { get; set; } = 4;
+
+    /// <summary>
+    /// Classes CSS additionnelles.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private static int GetColumnSize(int totalCards) => totalCards switch
+    {
+        1 => 12,
+        2 => 6,
+        3 => 4,
+        4 => 3,
+        _ => 3
+    };
+}

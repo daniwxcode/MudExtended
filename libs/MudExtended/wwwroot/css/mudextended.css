@@ -1,0 +1,347 @@
+/* ==========================================================================
+   MudExtended - Styles de base
+   Version: 1.0.0
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Variables CSS
+   -------------------------------------------------------------------------- */
+:root {
+    /* Espacements */
+    --mudext-spacing-xs: 2px;
+    --mudext-spacing-sm: 4px;
+    --mudext-spacing-md: 8px;
+    --mudext-spacing-lg: 16px;
+    --mudext-spacing-xl: 24px;
+    --mudext-spacing-2xl: 32px;
+    
+    /* Border radius */
+    --mudext-border-radius-sm: 4px;
+    --mudext-border-radius-md: 8px;
+    --mudext-border-radius-lg: 12px;
+    --mudext-border-radius-xl: 16px;
+    --mudext-border-radius-pill: 9999px;
+    
+    /* Transitions */
+    --mudext-transition-fast: 0.15s ease-in-out;
+    --mudext-transition-normal: 0.25s ease-in-out;
+    --mudext-transition-slow: 0.35s ease-in-out;
+    
+    /* Shadows */
+    --mudext-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --mudext-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --mudext-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --mudext-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    
+    /* Z-index */
+    --mudext-z-dropdown: 1000;
+    --mudext-z-sticky: 1020;
+    --mudext-z-fixed: 1030;
+    --mudext-z-modal-backdrop: 1040;
+    --mudext-z-modal: 1050;
+    --mudext-z-popover: 1060;
+    --mudext-z-tooltip: 1070;
+    --mudext-z-loader: 999999;
+}
+
+/* --------------------------------------------------------------------------
+   Utilitaires
+   -------------------------------------------------------------------------- */
+.mudext-rounded {
+    border-radius: var(--mudext-border-radius-lg) !important;
+}
+
+.mudext-rounded-xl {
+    border-radius: var(--mudext-border-radius-xl) !important;
+}
+
+.mudext-rounded-pill {
+    border-radius: var(--mudext-border-radius-pill) !important;
+}
+
+.mudext-shadow {
+    box-shadow: var(--mudext-shadow-md) !important;
+}
+
+.mudext-shadow-lg {
+    box-shadow: var(--mudext-shadow-lg) !important;
+}
+
+.mudext-transition {
+    transition: all var(--mudext-transition-normal) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Animation Skeleton
+   -------------------------------------------------------------------------- */
+@keyframes mudext-skeleton-wave {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.mudext-skeleton-wave {
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.06) 25%,
+        rgba(0, 0, 0, 0.15) 37%,
+        rgba(0, 0, 0, 0.06) 63%
+    );
+    background-size: 200% 100%;
+    animation: mudext-skeleton-wave 1.5s ease-in-out infinite;
+}
+
+/* Dark mode support */
+.mud-theme-dark .mudext-skeleton-wave {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.15) 37%,
+        rgba(255, 255, 255, 0.06) 63%
+    );
+    background-size: 200% 100%;
+}
+
+/* Animation rotate (pour loading spinner) */
+@keyframes mudext-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mudext-rotate {
+    animation: mudext-rotate 1s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Table Styles
+   -------------------------------------------------------------------------- */
+.mudext-table-container {
+    overflow-x: auto;
+}
+
+.mudext-table-header {
+    font-weight: 600;
+}
+
+.mudext-table-row-clickable {
+    cursor: pointer;
+}
+
+.mudext-table-row-clickable:hover {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   Card Styles
+   -------------------------------------------------------------------------- */
+.mudext-card {
+    border-radius: var(--mudext-border-radius-xl);
+    transition: box-shadow var(--mudext-transition-normal);
+}
+
+.mudext-card:hover {
+    box-shadow: var(--mudext-shadow-lg);
+}
+
+.mudext-card__header {
+    padding: var(--mudext-spacing-lg);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mudext-card__body {
+    padding: var(--mudext-spacing-lg);
+}
+
+.mudext-card__footer {
+    padding: var(--mudext-spacing-lg);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mudext-card__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--mudext-spacing-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Dialog Styles
+   -------------------------------------------------------------------------- */
+.mudext-dialog {
+    border-radius: var(--mudext-border-radius-xl);
+}
+
+.mudext-dialog-title {
+    padding: var(--mudext-spacing-md) !important;
+}
+
+.mudext-dialog-content {
+    padding: var(--mudext-spacing-lg);
+}
+
+.mudext-dialog-actions {
+    padding: var(--mudext-spacing-lg);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--mudext-spacing-md);
+}
+
+/* --------------------------------------------------------------------------
+   Status Badge Styles
+   -------------------------------------------------------------------------- */
+.mudext-status-badge {
+    font-weight: 500;
+    text-transform: none;
+}
+
+.mudext-status-badge--small {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+}
+
+.mudext-status-badge--medium {
+    font-size: 0.875rem;
+    padding: 4px 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Loading Overlay
+   -------------------------------------------------------------------------- */
+.mudext-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--mudext-z-loader);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.mudext-loading-overlay--light {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.mudext-loading-overlay--dark {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.mudext-loading-overlay__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--mudext-spacing-lg);
+}
+
+.mudext-loading-overlay__logo {
+    max-width: 180px;
+    height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Page Header
+   -------------------------------------------------------------------------- */
+.mudext-page-header {
+    padding: var(--mudext-spacing-lg) 0;
+}
+
+.mudext-page-header__title {
+    font-weight: 700;
+}
+
+.mudext-page-header__subtitle {
+    color: var(--mud-palette-text-secondary);
+}
+
+.mudext-page-header__actions {
+    display: flex;
+    gap: var(--mudext-spacing-md);
+}
+
+/* --------------------------------------------------------------------------
+   Stat Card
+   -------------------------------------------------------------------------- */
+.mudext-stat-card {
+    border-radius: var(--mudext-border-radius-xl);
+}
+
+.mudext-stat-card__value {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.mudext-stat-card__label {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.mudext-stat-card__sublabel {
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Form Styles
+   -------------------------------------------------------------------------- */
+.mudext-form-row {
+    display: flex;
+    gap: var(--mudext-spacing-lg);
+    margin-bottom: var(--mudext-spacing-lg);
+}
+
+.mudext-form-row > * {
+    flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination Info
+   -------------------------------------------------------------------------- */
+.mudext-pagination-info {
+    display: flex;
+    align-items: center;
+    gap: var(--mudext-spacing-md);
+    font-size: 0.875rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Utilities
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+    .mudext-form-row {
+        flex-direction: column;
+    }
+    
+    .mudext-page-header__actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .mudext-stat-card__value {
+        font-size: 1.25rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Print Styles
+   -------------------------------------------------------------------------- */
+@media print {
+    .mudext-loading-overlay,
+    .mudext-dialog-actions,
+    .mudext-card__actions,
+    .mudext-page-header__actions {
+        display: none !important;
+    }
+}

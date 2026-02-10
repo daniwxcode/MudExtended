@@ -1,0 +1,280 @@
+@using MudBlazor
+@using MudExtended.Components.Base
+@using MudExtended.Extensions
+@using MudExtended.Enums
+@typeparam TAsset
+@inherits AuthorizedComponentBase
+
+<MudCard Elevation="@Elevation" Class="@CombinedClass">
+    @* Header *@
+    <MudCardHeader>
+        @if (HeaderTemplate is not null)
+        {
+            @HeaderTemplate(Asset)
+        }
+    </MudCardHeader>
+
+    @* Body *@
+    <MudCardContent>
+        @if (BodyTemplate is not null)
+        {
+            @BodyTemplate(Asset)
+        }
+    </MudCardContent>
+
+    @* Footer (optionnel) *@
+    @if (FooterTemplate is not null)
+    {
+        <MudCardContent Class="pt-0">
+            @FooterTemplate(Asset)
+        </MudCardContent>
+    }
+
+    @* Actions *@
+    <MudCardActions Class="mudext-card__actions">
+        @if (ActionsTemplate is not null)
+        {
+            @ActionsTemplate(Asset)
+        }
+        else
+        {
+            @if (ShowDetailsButton && Permissions.CanRead)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Size="Size.Small"
+                               Color="Color.Primary"
+                               OnClick="HandleDetails"
+                               Title="@Localization.DetailsAction" />
+            }
+            @if (ShowEditButton && Permissions.CanUpdate)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Size="Size.Small"
+                               Color="Color.Warning"
+                               OnClick="HandleEdit"
+                               Title="@Localization.EditAction" />
+            }
+            @if (ShowDeleteButton && Permissions.CanDelete)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Color="Color.Error"
+                               OnClick="HandleDelete"
+                               Title="@Localization.DeleteAction" />
+            }
+        }
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
+
+    [Inject]
+    private Models.Configuration.MudExtendedOptions Options { get; set; } = default!;
+
+    /// <summary>
+    /// Bien � afficher.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public TAsset Asset { get; set; } = default!;
+
+    /// <summary>
+    /// NIF du contribuable.
+    /// </summary>
+    [Parameter]
+    public string? Tin { get; set; }
+
+    /// <summary>
+    /// Ressource UMTD pour les permissions.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string ResourceName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Template header.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment<TAsset> HeaderTemplate { get; set; } = default!;
+
+    /// <summary>
+    /// Template body.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment<TAsset> BodyTemplate { get; set; } = default!;
+
+    /// <summary>
+    /// Template footer.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<TAsset>? FooterTemplate { get; set; }
+
+    /// <summary>
+    /// Actions personnalis�es.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<TAsset>? ActionsTemplate { get; set; }
+
+    /// <summary>
+    /// Type du dialog d'�dition.
+    /// </summary>
+    [Parameter]
+    public Type? EditDialogType { get; set; }
+
+    /// <summary>
+    /// Type du dialog de d�tails.
+    /// </summary>
+    [Parameter]
+    public Type? DetailsDialogType { get; set; }
+
+    /// <summary>
+    /// Fonction de suppression.
+    /// </summary>
+    [Parameter]
+    public Func<TAsset, Task<bool>>? DeleteFunc { get; set; }
+
+    /// <summary>
+    /// Fonction d'extraction de l'ID.
+    /// </summary>
+    [Parameter]
+    public Func<TAsset, object>? IdFunc { get; set; }
+
+    /// <summary>
+    /// Classes CSS de la carte.
+    /// </summary>
+    [Parameter]
+    public string? CardClass { get; set; }
+
+    /// <summary>
+    /// �l�vation.
+    /// </summary>
+    [Parameter]
+    public int Elevation { get; set; } = 3;
+
+    /// <summary>
+    /// Afficher bouton �dition.
+    /// </summary>
+    [Parameter]
+    public bool ShowEditButton { get; set; } = true;
+
+    /// <summary>
+    /// Afficher bouton suppression.
+    /// </summary>
+    [Parameter]
+    public bool ShowDeleteButton { get; set; } = true;
+
+    /// <summary>
+    /// Afficher bouton d�tails.
+    /// </summary>
+    [Parameter]
+    public bool ShowDetailsButton { get; set; }
+
+    /// <summary>
+    /// �v�nement apr�s action.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnActionCompleted { get; set; }
+
+    /// <summary>
+    /// �v�nement �dition demand�e.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TAsset> OnEdit { get; set; }
+
+    /// <summary>
+    /// �v�nement suppression demand�e.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TAsset> OnDelete { get; set; }
+
+    /// <summary>
+    /// �v�nement d�tails demand�s.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TAsset> OnDetails { get; set; }
+
+    /// <inheritdoc/>
+    protected override string Resource => ResourceName;
+
+    private Models.Configuration.TableLocalization Localization => 
+        Options?.DefaultTableLocalization ?? new();
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(CardClass)
+        ? "mudext-card"
+        : $"mudext-card {CardClass}";
+
+    private async Task HandleEdit()
+    {
+        if (OnEdit.HasDelegate)
+        {
+            await OnEdit.InvokeAsync(Asset);
+            return;
+        }
+
+        if (EditDialogType is not null)
+        {
+            var parameters = new DialogParameters
+            {
+                { "Entity", Asset },
+                { "IsCreate", false },
+                { "Tin", Tin }
+            };
+
+            if (IdFunc is not null)
+            {
+                parameters.Add("EntityId", IdFunc(Asset));
+            }
+
+            var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
+            var dialog = await DialogService.ShowAsync(EditDialogType, "Modifier", parameters, options);
+            var result = await dialog.Result;
+
+            if (result is { Canceled: false })
+            {
+                await OnActionCompleted.InvokeAsync();
+            }
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (OnDelete.HasDelegate)
+        {
+            await OnDelete.InvokeAsync(Asset);
+            return;
+        }
+
+        if (DeleteFunc is not null)
+        {
+            var confirmed = await DialogService.ConfirmDeleteAsync("cet �l�ment");
+            if (confirmed)
+            {
+                var success = await DeleteFunc(Asset);
+                if (success)
+                {
+                    await OnActionCompleted.InvokeAsync();
+                }
+            }
+        }
+    }
+
+    private async Task HandleDetails()
+    {
+        if (OnDetails.HasDelegate)
+        {
+            await OnDetails.InvokeAsync(Asset);
+            return;
+        }
+
+        if (DetailsDialogType is not null)
+        {
+            var parameters = new DialogParameters
+            {
+                { "Entity", Asset }
+            };
+
+            var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
+            await DialogService.ShowAsync(DetailsDialogType, "D�tails", parameters, options);
+        }
+    }
+}

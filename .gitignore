@@ -1,0 +1,86 @@
+# MudExtended .gitignore
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio files
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## Build caches
+*.VisualState.xml
+TestResult.xml
+nCrunchTemp_*
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Rider
+.idea/
+*.sln.iml
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Coverage
+coverage/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+
+## Publish
+publish/
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## JetBrains
+.idea/
+
+## NCrunch
+*.ncrunch*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+## DocFx
+_site/
+api/

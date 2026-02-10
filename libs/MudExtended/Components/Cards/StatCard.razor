@@ -1,0 +1,114 @@
+@using MudBlazor
+@using MudExtended.Enums
+@using MudExtended.Models.Configuration
+@using System.Globalization
+
+<MudPaper Elevation="@Elevation" Class="@CombinedClass">
+    <div class="d-flex align-center gap-4 pa-4">
+        <MudAvatar Color="@Color" Size="Size.Large" Variant="Variant.Filled">
+            <MudIcon Icon="@Icon" Size="Size.Medium" />
+        </MudAvatar>
+        <div class="flex-grow-1">
+            <MudText Typo="Typo.caption" Class="mudext-stat-card__label">@Label</MudText>
+            <MudText Typo="Typo.h5" Class="mudext-stat-card__value">@FormattedValue</MudText>
+            @if (!string.IsNullOrWhiteSpace(SubLabel) || SubValue is not null)
+            {
+                <MudText Typo="Typo.caption" Class="mudext-stat-card__sublabel">
+                    @if (!string.IsNullOrWhiteSpace(SubLabel))
+                    {
+                        @SubLabel@: 
+                    }
+                    @if (SubValue is not null)
+                    {
+                        @FormatValue(SubValue, ValueType)
+                    }
+                </MudText>
+            }
+        </div>
+    </div>
+</MudPaper>
+
+@code {
+    [Inject]
+    private MudExtendedOptions Options { get; set; } = default!;
+
+    /// <summary>
+    /// Libell� de la statistique.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Valeur principale.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public object Value { get; set; } = 0;
+
+    /// <summary>
+    /// Sous-libell�.
+    /// </summary>
+    [Parameter]
+    public string? SubLabel { get; set; }
+
+    /// <summary>
+    /// Sous-valeur.
+    /// </summary>
+    [Parameter]
+    public object? SubValue { get; set; }
+
+    /// <summary>
+    /// Ic�ne Material.
+    /// </summary>
+    [Parameter]
+    public string Icon { get; set; } = Icons.Material.Filled.Analytics;
+
+    /// <summary>
+    /// Couleur.
+    /// </summary>
+    [Parameter]
+    public Color Color { get; set; } = Color.Primary;
+
+    /// <summary>
+    /// Type de formatage de la valeur.
+    /// </summary>
+    [Parameter]
+    public StatValueType ValueType { get; set; } = StatValueType.Number;
+
+    /// <summary>
+    /// �l�vation.
+    /// </summary>
+    [Parameter]
+    public int Elevation { get; set; } = 2;
+
+    /// <summary>
+    /// Classes CSS additionnelles.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(Class)
+        ? "mudext-stat-card"
+        : $"mudext-stat-card {Class}";
+
+    private string FormattedValue => FormatValue(Value, ValueType);
+
+    private string FormatValue(object value, StatValueType type)
+    {
+        var culture = Options?.Culture ?? CultureInfo.GetCultureInfo("fr-FR");
+        var currencySymbol = Options?.CurrencySymbol ?? "FCFA";
+
+        return type switch
+        {
+            StatValueType.Number when value is IFormattable formattable 
+                => formattable.ToString("N0", culture),
+            StatValueType.Currency when value is IFormattable formattable 
+                => $"{formattable.ToString("N0", culture)} {currencySymbol}",
+            StatValueType.Percentage when value is IFormattable formattable 
+                => $"{formattable.ToString("N1", culture)}%",
+            StatValueType.Decimal when value is IFormattable formattable 
+                => formattable.ToString("N2", culture),
+            StatValueType.Raw => value.ToString() ?? string.Empty,
+            _ => value.ToString() ?? string.Empty
+        };
+    }
+}

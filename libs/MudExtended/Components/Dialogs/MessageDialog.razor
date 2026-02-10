@@ -1,0 +1,144 @@
+@using MudBlazor
+@using MudExtended.Enums
+
+<MudDialog>
+    <DialogContent>
+        <div class="d-flex gap-4 pa-4">
+            @if (ShowIcon)
+            {
+                <MudIcon Icon="@IconValue" Color="@IconColor" Size="Size.Large" />
+            }
+            <div class="d-flex flex-column justify-center">
+                @if (MessageContent is not null)
+                {
+                    @MessageContent
+                }
+                else if (!string.IsNullOrWhiteSpace(Message))
+                {
+                    <MudText Typo="Typo.body1">@Message</MudText>
+                }
+                
+                @if (!string.IsNullOrWhiteSpace(SecondaryMessage))
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                        @SecondaryMessage
+                    </MudText>
+                }
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        @if (ShowCancelButton)
+        {
+            <MudButton OnClick="Cancel" Variant="Variant.Text">@CancelText</MudButton>
+        }
+        <MudButton OnClick="Close" Variant="Variant.Filled" Color="@ButtonColor">
+            @OkText
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    /// <summary>
+    /// Instance du dialog MudBlazor.
+    /// </summary>
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>
+    /// Titre du dialog.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Message";
+
+    /// <summary>
+    /// Message principal.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Message secondaire (d�tails).
+    /// </summary>
+    [Parameter]
+    public string? SecondaryMessage { get; set; }
+
+    /// <summary>
+    /// Contenu HTML du message.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? MessageContent { get; set; }
+
+    /// <summary>
+    /// S�v�rit� du message.
+    /// </summary>
+    [Parameter]
+    public MessageSeverity Severity { get; set; } = MessageSeverity.Info;
+
+    /// <summary>
+    /// Texte du bouton OK.
+    /// </summary>
+    [Parameter]
+    public string OkText { get; set; } = "OK";
+
+    /// <summary>
+    /// Texte du bouton Annuler.
+    /// </summary>
+    [Parameter]
+    public string CancelText { get; set; } = "Annuler";
+
+    /// <summary>
+    /// Afficher l'ic�ne.
+    /// </summary>
+    [Parameter]
+    public bool ShowIcon { get; set; } = true;
+
+    /// <summary>
+    /// Afficher le bouton Annuler.
+    /// </summary>
+    [Parameter]
+    public bool ShowCancelButton { get; set; }
+
+    /// <summary>
+    /// Ic�ne personnalis�e (auto-d�termin�e si null).
+    /// </summary>
+    [Parameter]
+    public string? Icon { get; set; }
+
+    private string IconValue => Icon ?? Severity switch
+    {
+        MessageSeverity.Info => Icons.Material.Filled.Info,
+        MessageSeverity.Success => Icons.Material.Filled.CheckCircle,
+        MessageSeverity.Warning => Icons.Material.Filled.Warning,
+        MessageSeverity.Error => Icons.Material.Filled.Error,
+        _ => Icons.Material.Filled.Info
+    };
+
+    private Color IconColor => Severity switch
+    {
+        MessageSeverity.Info => Color.Info,
+        MessageSeverity.Success => Color.Success,
+        MessageSeverity.Warning => Color.Warning,
+        MessageSeverity.Error => Color.Error,
+        _ => Color.Info
+    };
+
+    private Color ButtonColor => Severity switch
+    {
+        MessageSeverity.Info => Color.Primary,
+        MessageSeverity.Success => Color.Success,
+        MessageSeverity.Warning => Color.Warning,
+        MessageSeverity.Error => Color.Error,
+        _ => Color.Primary
+    };
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        MudDialog.SetTitle(Title);
+    }
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -1,0 +1,267 @@
+@using MudBlazor
+@using MudExtended.Models.Configuration
+@typeparam TEntity
+@typeparam TCreateCommand
+@typeparam TUpdateCommand
+
+<MudDialog>
+    <DialogContent>
+        @if (_isLoading)
+        {
+            <div class="d-flex flex-column align-center pa-8">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.body2" Class="mt-4">Chargement...</MudText>
+            </div>
+        }
+        else if (_isSaving)
+        {
+            <div class="d-flex flex-column align-center pa-8">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.body2" Class="mt-4">Enregistrement...</MudText>
+            </div>
+        }
+        else
+        {
+            <MudForm @ref="_form" @bind-IsValid="_isFormValid">
+                <div class="pa-4">
+                    @if (FormContent is not null)
+                    {
+                        @FormContent(_currentModel!)
+                    }
+                    
+                    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mt-4">@_errorMessage</MudAlert>
+                    }
+                </div>
+            </MudForm>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text" Disabled="@_isSaving">
+            Annuler
+        </MudButton>
+        <MudButton OnClick="Submit" 
+                   Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   Disabled="@(!_isFormValid || _isSaving || _isLoading)">
+            @(IsCreate ? CreateButtonText : UpdateButtonText)
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    private MudExtendedOptions Options { get; set; } = default!;
+
+    #region Parameters
+
+    /// <summary>
+    /// Mode cr�ation ou �dition.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public bool IsCreate { get; set; }
+
+    /// <summary>
+    /// Entit� � �diter (mode �dition).
+    /// </summary>
+    [Parameter]
+    public TEntity? Entity { get; set; }
+
+    /// <summary>
+    /// ID de l'entit� (mode �dition).
+    /// </summary>
+    [Parameter]
+    public object? EntityId { get; set; }
+
+    /// <summary>
+    /// Fonction de cr�ation.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<TCreateCommand, Task<TEntity>> CreateFunc { get; set; } = default!;
+
+    /// <summary>
+    /// Fonction de mise � jour.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<object, TUpdateCommand, Task<TEntity>> UpdateFunc { get; set; } = default!;
+
+    /// <summary>
+    /// Factory pour cr�er une commande de cr�ation.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<TCreateCommand> MapToCreate { get; set; } = default!;
+
+    /// <summary>
+    /// Mapper entit� vers commande de mise � jour.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<TEntity, TUpdateCommand> MapToUpdate { get; set; } = default!;
+
+    /// <summary>
+    /// Contenu du formulaire.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment<object> FormContent { get; set; } = default!;
+
+    /// <summary>
+    /// Titre du dialog (auto-g�n�r� si null).
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// Pr�fixe titre cr�ation.
+    /// </summary>
+    [Parameter]
+    public string CreateTitle { get; set; } = "Cr�er";
+
+    /// <summary>
+    /// Pr�fixe titre �dition.
+    /// </summary>
+    [Parameter]
+    public string EditTitle { get; set; } = "Modifier";
+
+    /// <summary>
+    /// Nom de l'entit� pour le titre.
+    /// </summary>
+    [Parameter]
+    public string EntityName { get; set; } = "";
+
+    /// <summary>
+    /// Message de succ�s.
+    /// </summary>
+    [Parameter]
+    public string? SuccessMessage { get; set; }
+
+    /// <summary>
+    /// Texte du bouton de cr�ation.
+    /// </summary>
+    [Parameter]
+    public string CreateButtonText { get; set; } = "Cr�er";
+
+    /// <summary>
+    /// Texte du bouton de mise � jour.
+    /// </summary>
+    [Parameter]
+    public string UpdateButtonText { get; set; } = "Enregistrer";
+
+    /// <summary>
+    /// �v�nement apr�s sauvegarde r�ussie.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TEntity?> OnSuccess { get; set; }
+
+    /// <summary>
+    /// �v�nement d'annulation.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    #endregion
+
+    #region Private Fields
+
+    private MudForm? _form;
+    private object? _currentModel;
+    private bool _isFormValid;
+    private bool _isLoading;
+    private bool _isSaving;
+    private string? _errorMessage;
+
+    #endregion
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        InitializeModel();
+        SetDialogTitle();
+    }
+
+    private void InitializeModel()
+    {
+        if (IsCreate)
+        {
+            _currentModel = MapToCreate();
+        }
+        else if (Entity is not null)
+        {
+            _currentModel = MapToUpdate(Entity);
+        }
+    }
+
+    private void SetDialogTitle()
+    {
+        var title = Title;
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            var prefix = IsCreate ? CreateTitle : EditTitle;
+            title = string.IsNullOrWhiteSpace(EntityName) 
+                ? prefix 
+                : $"{prefix} {EntityName}";
+        }
+        MudDialog.SetTitle(title);
+    }
+
+    private async Task Submit()
+    {
+        if (_form is not null)
+        {
+            await _form.Validate();
+            if (!_isFormValid) return;
+        }
+
+        _errorMessage = null;
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            TEntity result;
+
+            if (IsCreate && _currentModel is TCreateCommand createCmd)
+            {
+                result = await CreateFunc(createCmd);
+            }
+            else if (!IsCreate && _currentModel is TUpdateCommand updateCmd && EntityId is not null)
+            {
+                result = await UpdateFunc(EntityId, updateCmd);
+            }
+            else
+            {
+                throw new InvalidOperationException("Configuration invalide du dialog");
+            }
+
+            var message = SuccessMessage ?? (IsCreate ? "�l�ment cr�� avec succ�s" : "�l�ment modifi� avec succ�s");
+            Snackbar.Add(message, Severity.Success);
+
+            await OnSuccess.InvokeAsync(result);
+            MudDialog.Close(DialogResult.Ok(result));
+        }
+        catch (HttpRequestException ex)
+        {
+            _errorMessage = $"Erreur: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Erreur inattendue: {ex.Message}";
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private void Cancel()
+    {
+        OnCancel.InvokeAsync();
+        MudDialog.Cancel();
+    }
+}

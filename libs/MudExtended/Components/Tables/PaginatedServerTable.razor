@@ -1,0 +1,515 @@
+@using MudBlazor
+@using MudExtended.Components.Base
+@using MudExtended.Components.Loading
+@using MudExtended.Enums
+@using MudExtended.Extensions
+@using MudExtended.Models.Pagination
+@using MudExtended.Models.Configuration
+@typeparam TEntity
+@inherits AuthorizedComponentBase
+
+<MudPaper Elevation="@Elevation" Class="@CombinedClass">
+    @* Toolbar *@
+    <div class="d-flex justify-space-between align-center flex-wrap gap-2 pa-4">
+        <div class="d-flex align-center gap-2">
+            @if (!string.IsNullOrWhiteSpace(Title))
+            {
+                <MudText Typo="Typo.h6">@Title</MudText>
+            }
+        </div>
+        
+        <div class="d-flex align-center gap-2 flex-wrap">
+            @if (ShowSearch)
+            {
+                <MudTextField T="string"
+                              Value="@_searchString"
+                              ValueChanged="OnSearchChanged"
+                              Placeholder="@Localization.SearchPlaceholder"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Immediate="true"
+                              DebounceInterval="@_debounceDelay"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Style="min-width: 200px;" />
+            }
+            
+            @if (ToolbarContent is not null)
+            {
+                @ToolbarContent
+            }
+            
+            @if (ShowRefreshButton)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                               OnClick="RefreshAsync"
+                               Title="@Localization.RefreshButton"
+                               Color="Color.Default" />
+            }
+            
+            @if (ShowCreateButton && Permissions.CanCreate && CreateDialogType is not null)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Add"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="OpenCreateDialog">
+                    @Localization.AddButton
+                </MudButton>
+            }
+        </div>
+    </div>
+
+    @* Table *@
+    @if (_isLoading && _items.Count == 0)
+    {
+        <GenericSkeleton Layout="SkeletonLayout.Table" 
+                         TableColumns="@_columnCount" 
+                         TableRows="@DefaultPageSize"
+                         ShowSearch="false" />
+    }
+    else
+    {
+        <MudTable T="TEntity"
+                  Items="@_items"
+                  Dense="@Dense"
+                  Striped="@Striped"
+                  Hover="@Hover"
+                  Loading="@_isLoading"
+                  LoadingProgressColor="Color.Primary"
+                  RowClass="@RowClass"
+                  OnRowClick="HandleRowClick"
+                  Elevation="0">
+            <HeaderContent>
+                @Columns
+                @if (ShowActions)
+                {
+                    <MudTh Style="width: 120px; text-align: right;">@Localization.ActionsColumn</MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                @RowTemplate(context)
+                @if (ShowActions)
+                {
+                    <MudTd DataLabel="@Localization.ActionsColumn" Style="text-align: right;">
+                        @if (ActionsTemplate is not null)
+                        {
+                            @ActionsTemplate(context)
+                        }
+                        else
+                        {
+                            @if (EditDialogType is not null && Permissions.CanUpdate)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Size="Size.Small"
+                                               Color="Color.Warning"
+                                               OnClick="@(() => OpenEditDialog(context))"
+                                               Title="@Localization.EditAction" />
+                            }
+                            @if (DeleteFunc is not null && Permissions.CanDelete)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => HandleDelete(context))"
+                                               Title="@Localization.DeleteAction" />
+                            }
+                        }
+                    </MudTd>
+                }
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Typo="Typo.body2" Align="Align.Center" Class="pa-4">
+                    @EmptyMessage
+                </MudText>
+            </NoRecordsContent>
+        </MudTable>
+
+        @* Pagination *@
+        <div class="d-flex justify-space-between align-center flex-wrap pa-4">
+            <PaginationInfo Pagination="@_pagination"
+                            ShowPageSizeSelector="true"
+                            PageSizeOptions="@PageSizeOptions"
+                            OnPageSizeChanged="OnPageSizeChanged" />
+            
+            <MudPagination Count="@_pagination.TotalPages"
+                           Selected="@_pagination.CurrentPage"
+                           SelectedChanged="OnPageChanged"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           BoundaryCount="1"
+                           MiddleCount="3" />
+        </div>
+    }
+</MudPaper>
+
+@code {
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
+
+    [Inject]
+    private MudExtendedOptions Options { get; set; } = default!;
+
+    #region Parameters - Required
+
+    /// <summary>
+    /// Ressource UMTD pour les permissions.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string ResourceName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Fonction de recherche API.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public Func<PaginationFilter, CancellationToken, Task<PagedResult<TEntity>>> SearchFunc { get; set; } = default!;
+
+    /// <summary>
+    /// D�finition des colonnes.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment Columns { get; set; } = default!;
+
+    /// <summary>
+    /// Template de ligne.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment<TEntity> RowTemplate { get; set; } = default!;
+
+    #endregion
+
+    #region Parameters - Optional
+
+    /// <summary>
+    /// Titre affich�.
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// Type du dialog de cr�ation.
+    /// </summary>
+    [Parameter]
+    public Type? CreateDialogType { get; set; }
+
+    /// <summary>
+    /// Type du dialog d'�dition.
+    /// </summary>
+    [Parameter]
+    public Type? EditDialogType { get; set; }
+
+    /// <summary>
+    /// Fonction de suppression.
+    /// </summary>
+    [Parameter]
+    public Func<TEntity, Task<bool>>? DeleteFunc { get; set; }
+
+    /// <summary>
+    /// Fonction d'extraction de l'ID.
+    /// </summary>
+    [Parameter]
+    public Func<TEntity, object>? IdFunc { get; set; }
+
+    /// <summary>
+    /// Actions personnalis�es.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<TEntity>? ActionsTemplate { get; set; }
+
+    /// <summary>
+    /// Contenu de la toolbar.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ToolbarContent { get; set; }
+
+    /// <summary>
+    /// Afficher la recherche.
+    /// </summary>
+    [Parameter]
+    public bool ShowSearch { get; set; } = true;
+
+    /// <summary>
+    /// Afficher le bouton Ajouter.
+    /// </summary>
+    [Parameter]
+    public bool ShowCreateButton { get; set; } = true;
+
+    /// <summary>
+    /// Afficher le bouton Rafra�chir.
+    /// </summary>
+    [Parameter]
+    public bool ShowRefreshButton { get; set; } = true;
+
+    /// <summary>
+    /// Afficher la colonne Actions.
+    /// </summary>
+    [Parameter]
+    public bool ShowActions { get; set; } = true;
+
+    /// <summary>
+    /// Taille de page par d�faut.
+    /// </summary>
+    [Parameter]
+    public int DefaultPageSize { get; set; } = 10;
+
+    /// <summary>
+    /// Options de taille de page.
+    /// </summary>
+    [Parameter]
+    public int[] PageSizeOptions { get; set; } = [10, 25, 50, 100];
+
+    /// <summary>
+    /// Message liste vide.
+    /// </summary>
+    [Parameter]
+    public string? EmptyMessage { get; set; }
+
+    /// <summary>
+    /// �l�vation du paper.
+    /// </summary>
+    [Parameter]
+    public int Elevation { get; set; }
+
+    /// <summary>
+    /// Mode compact.
+    /// </summary>
+    [Parameter]
+    public bool Dense { get; set; } = true;
+
+    /// <summary>
+    /// Lignes altern�es.
+    /// </summary>
+    [Parameter]
+    public bool Striped { get; set; } = true;
+
+    /// <summary>
+    /// Effet hover.
+    /// </summary>
+    [Parameter]
+    public bool Hover { get; set; } = true;
+
+    /// <summary>
+    /// Classes CSS additionnelles.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Classe CSS des lignes.
+    /// </summary>
+    [Parameter]
+    public string? RowClass { get; set; }
+
+    /// <summary>
+    /// Localisation.
+    /// </summary>
+    [Parameter]
+    public TableLocalization? LocalizationOverride { get; set; }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Apr�s cr�ation r�ussie.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCreate { get; set; }
+
+    /// <summary>
+    /// Apr�s �dition r�ussie.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TEntity> OnEdit { get; set; }
+
+    /// <summary>
+    /// Apr�s suppression r�ussie.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TEntity> OnDelete { get; set; }
+
+    /// <summary>
+    /// Au clic sur une ligne.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TEntity> OnRowClick { get; set; }
+
+    #endregion
+
+    #region Private Fields
+
+    private List<TEntity> _items = [];
+    private PaginationState _pagination = new();
+    private string? _searchString;
+    private bool _isLoading;
+    private CancellationTokenSource? _cts;
+    private int _columnCount = 5;
+    private int _debounceDelay = 300;
+
+    #endregion
+
+    /// <inheritdoc/>
+    protected override string Resource => ResourceName;
+
+    private TableLocalization Localization => LocalizationOverride ?? Options?.DefaultTableLocalization ?? new();
+
+    private string CombinedClass => string.IsNullOrWhiteSpace(Class)
+        ? "mudext-table-container"
+        : $"mudext-table-container {Class}";
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _debounceDelay = Options?.SearchDebounceDelay ?? 300;
+        _pagination = _pagination with { PageSize = DefaultPageSize };
+        EmptyMessage ??= Localization.NoRecordsMessage;
+
+        await LoadDataAsync();
+    }
+
+    /// <summary>
+    /// Recharge les donn�es.
+    /// </summary>
+    public async Task RefreshAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    /// <summary>
+    /// Remet � la page 1.
+    /// </summary>
+    public async Task ResetPaginationAsync()
+    {
+        _pagination = _pagination.WithPage(1);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var filter = new PaginationFilter
+            {
+                PageNumber = _pagination.CurrentPage,
+                PageSize = _pagination.PageSize,
+                Keyword = _searchString
+            };
+
+            var result = await SearchFunc(filter, _cts.Token);
+
+            _items = result.Data.ToList();
+            _pagination = result.ToPaginationState();
+        }
+        catch (OperationCanceledException)
+        {
+            // Recherche annul�e
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        _searchString = value;
+        _pagination = _pagination.WithPage(1);
+        await LoadDataAsync();
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _pagination = _pagination.WithPage(page);
+        await LoadDataAsync();
+    }
+
+    private async Task OnPageSizeChanged(int size)
+    {
+        _pagination = _pagination.WithPageSize(size);
+        await LoadDataAsync();
+    }
+
+    private async Task HandleRowClick(TableRowClickEventArgs<TEntity> args)
+    {
+        if (OnRowClick.HasDelegate)
+        {
+            await OnRowClick.InvokeAsync(args.Item);
+        }
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        if (CreateDialogType is null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "IsCreate", true }
+        };
+
+        var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
+        var dialog = await DialogService.ShowAsync(CreateDialogType, "Cr�er", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await OnCreate.InvokeAsync();
+            await RefreshAsync();
+        }
+    }
+
+    private async Task OpenEditDialog(TEntity entity)
+    {
+        if (EditDialogType is null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Entity", entity },
+            { "IsCreate", false }
+        };
+
+        if (IdFunc is not null)
+        {
+            parameters.Add("EntityId", IdFunc(entity));
+        }
+
+        var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
+        var dialog = await DialogService.ShowAsync(EditDialogType, "Modifier", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await OnEdit.InvokeAsync(entity);
+            await RefreshAsync();
+        }
+    }
+
+    private async Task HandleDelete(TEntity entity)
+    {
+        if (DeleteFunc is null) return;
+
+        var confirmed = await DialogService.ConfirmDeleteAsync("cet �l�ment");
+        if (!confirmed) return;
+
+        var success = await DeleteFunc(entity);
+        if (success)
+        {
+            await OnDelete.InvokeAsync(entity);
+            await RefreshAsync();
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+}

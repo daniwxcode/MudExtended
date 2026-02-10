@@ -1,0 +1,222 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@implements IAsyncDisposable
+
+@code {
+    [Inject]
+    private ILogger<SignalRSubscriber> Logger { get; set; } = default!;
+
+    /// <summary>
+    /// ID du groupe (ex: TIN).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string GroupId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Nom de l'�v�nement � �couter.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string EventName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Connexion SignalR (inject�e ou pass�e en param�tre).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public HubConnection HubConnection { get; set; } = default!;
+
+    /// <summary>
+    /// Connexion automatique.
+    /// </summary>
+    [Parameter]
+    public bool AutoConnect { get; set; } = true;
+
+    /// <summary>
+    /// Reconnexion automatique.
+    /// </summary>
+    [Parameter]
+    public bool AutoReconnect { get; set; } = true;
+
+    /// <summary>
+    /// �v�nement re�u.
+    /// </summary>
+    [Parameter]
+    public EventCallback<object?> OnEventReceived { get; set; }
+
+    /// <summary>
+    /// Connexion �tablie.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnConnected { get; set; }
+
+    /// <summary>
+    /// D�connexion.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Exception?> OnDisconnected { get; set; }
+
+    /// <summary>
+    /// Reconnexion en cours.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnReconnecting { get; set; }
+
+    private IDisposable? _subscription;
+    private bool _isJoined;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        if (HubConnection is null)
+        {
+            Logger.LogWarning("HubConnection is null, SignalRSubscriber will not function");
+            return;
+        }
+
+        // Configurer les �v�nements de connexion
+        HubConnection.Closed += OnClosed;
+        HubConnection.Reconnecting += OnReconnecting_;
+        HubConnection.Reconnected += OnReconnected;
+
+        // S'abonner � l'�v�nement
+        _subscription = HubConnection.On<object?>(EventName, async payload =>
+        {
+            Logger.LogDebug("Received event {EventName} with payload", EventName);
+            await OnEventReceived.InvokeAsync(payload);
+        });
+
+        // Connexion automatique
+        if (AutoConnect && HubConnection.State == HubConnectionState.Disconnected)
+        {
+            await ConnectAsync();
+        }
+        else if (HubConnection.State == HubConnectionState.Connected)
+        {
+            await JoinGroupAsync();
+        }
+    }
+
+    /// <summary>
+    /// Connecte au hub.
+    /// </summary>
+    public async Task ConnectAsync()
+    {
+        if (HubConnection is null) return;
+
+        try
+        {
+            if (HubConnection.State == HubConnectionState.Disconnected)
+            {
+                await HubConnection.StartAsync();
+                Logger.LogInformation("Connected to SignalR hub");
+                await OnConnected.InvokeAsync();
+            }
+
+            await JoinGroupAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to connect to SignalR hub");
+        }
+    }
+
+    /// <summary>
+    /// D�connecte du hub.
+    /// </summary>
+    public async Task DisconnectAsync()
+    {
+        if (HubConnection is null) return;
+
+        try
+        {
+            await LeaveGroupAsync();
+
+            if (HubConnection.State == HubConnectionState.Connected)
+            {
+                await HubConnection.StopAsync();
+                Logger.LogInformation("Disconnected from SignalR hub");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to disconnect from SignalR hub");
+        }
+    }
+
+    private async Task JoinGroupAsync()
+    {
+        if (_isJoined || string.IsNullOrWhiteSpace(GroupId)) return;
+
+        try
+        {
+            await HubConnection.InvokeAsync("JoinGroup", GroupId);
+            _isJoined = true;
+            Logger.LogDebug("Joined group {GroupId}", GroupId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to join group {GroupId}", GroupId);
+        }
+    }
+
+    private async Task LeaveGroupAsync()
+    {
+        if (!_isJoined || string.IsNullOrWhiteSpace(GroupId)) return;
+
+        try
+        {
+            await HubConnection.InvokeAsync("LeaveGroup", GroupId);
+            _isJoined = false;
+            Logger.LogDebug("Left group {GroupId}", GroupId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to leave group {GroupId}", GroupId);
+        }
+    }
+
+    private async Task OnClosed(Exception? exception)
+    {
+        _isJoined = false;
+        Logger.LogWarning(exception, "SignalR connection closed");
+        await OnDisconnected.InvokeAsync(exception);
+    }
+
+    private async Task OnReconnecting_(Exception? exception)
+    {
+        _isJoined = false;
+        Logger.LogInformation("SignalR reconnecting...");
+        await OnReconnecting.InvokeAsync();
+    }
+
+    private async Task OnReconnected(string? connectionId)
+    {
+        Logger.LogInformation("SignalR reconnected with connection ID: {ConnectionId}", connectionId);
+        await JoinGroupAsync();
+        await OnConnected.InvokeAsync();
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (HubConnection is not null)
+        {
+            HubConnection.Closed -= OnClosed;
+            HubConnection.Reconnecting -= OnReconnecting_;
+            HubConnection.Reconnected -= OnReconnected;
+
+            if (_isJoined)
+            {
+                try
+                {
+                    await LeaveGroupAsync();
+                }
+                catch
+                {
+                    // Ignore errors during disposal
+                }
+            }
+        }
+
+        _subscription?.Dispose();
+    }
+}
