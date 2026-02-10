@@ -1,8 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MudExtended/MudExtended.csproj" />
+  </Folder>
   <Folder Name="/docs/">
     <Project Path="docs/MudExtended.Docs/MudExtended.Docs.csproj" />
-  </Folder>
-  <Folder Name="/libs/">
-    <Project Path="libs/MudExtended/MudExtended.csproj" />
   </Folder>
 </Solution>
