@@ -1,0 +1,139 @@
+@using MudBlazor
+
+<MudCard Class="@CombinedCardClass" Style="@CardStyle" Elevation="@Elevation" Outlined="@Outlined">
+    <MudGrid Class="@CombinedGridClass" Spacing="@Spacing">
+        <MudItem xs="12">
+            <PageHeader Title="@Title" Header="@Header" SubHeader="@SubHeader" Actions="@Actions">
+                @if (HeaderContent is not null)
+                {
+                    @HeaderContent
+                }
+            </PageHeader>
+        </MudItem>
+
+        @if (StatsContent is not null)
+        {
+            <MudItem xs="12">
+                @StatsContent
+            </MudItem>
+        }
+
+        @if (FiltersContent is not null)
+        {
+            <MudItem xs="12">
+                @FiltersContent
+            </MudItem>
+        }
+
+        <MudItem xs="12">
+            @TableContent
+        </MudItem>
+
+        @if (FooterContent is not null)
+        {
+            <MudItem xs="12">
+                @FooterContent
+            </MudItem>
+        }
+    </MudGrid>
+</MudCard>
+
+@code {
+    /// <summary>
+    /// Page title (title tag).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Displayed header.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Header { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Subtitle.
+    /// </summary>
+    [Parameter]
+    public string? SubHeader { get; set; }
+
+    /// <summary>
+    /// Action buttons.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    /// <summary>
+    /// Optional content displayed under the header.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? HeaderContent { get; set; }
+
+    /// <summary>
+    /// Statistics content section.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? StatsContent { get; set; }
+
+    /// <summary>
+    /// Filters content section.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? FiltersContent { get; set; }
+
+    /// <summary>
+    /// Main table content.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RenderFragment TableContent { get; set; } = default!;
+
+    /// <summary>
+    /// Footer content section.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? FooterContent { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes applied to the card.
+    /// </summary>
+    [Parameter]
+    public string? CardClass { get; set; }
+
+    /// <summary>
+    /// Inline style applied to the card.
+    /// </summary>
+    [Parameter]
+    public string? CardStyle { get; set; }
+
+    /// <summary>
+    /// Card elevation.
+    /// </summary>
+    [Parameter]
+    public int Elevation { get; set; }
+
+    /// <summary>
+    /// Whether the card is outlined.
+    /// </summary>
+    [Parameter]
+    public bool Outlined { get; set; } = true;
+
+    /// <summary>
+    /// Grid spacing value.
+    /// </summary>
+    [Parameter]
+    public int Spacing { get; set; } = 3;
+
+    /// <summary>
+    /// Additional CSS classes applied to the grid.
+    /// </summary>
+    [Parameter]
+    public string? GridClass { get; set; }
+
+    private string CombinedCardClass => string.IsNullOrWhiteSpace(CardClass)
+        ? "mudext-table-page"
+        : $"mudext-table-page {CardClass}";
+
+    private string CombinedGridClass => string.IsNullOrWhiteSpace(GridClass)
+        ? string.Empty
+        : GridClass;
+}
