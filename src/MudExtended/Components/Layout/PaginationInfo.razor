@@ -1,5 +1,6 @@
 @using MudBlazor
 @using MudExtended.Models.Pagination
+@using MudExtended.Services.Localization
 
 <div class="@CombinedClass">
     <MudText Typo="Typo.body2" Color="Color.Secondary">
@@ -24,17 +25,22 @@
 </div>
 
 @code {
-    /// <summary>
-    /// �tat de pagination.
-    /// </summary>
-    [Parameter, EditorRequired]
-    public PaginationState Pagination { get; set; } = new();
+[Inject]
+private ILocalizationService Localization { get; set; } = default!;
 
-    /// <summary>
-    /// Template d'affichage.
-    /// </summary>
-    [Parameter]
-    public string Template { get; set; } = "{from} � {to} sur {total}";
+/// <summary>
+/// État de pagination.
+/// </summary>
+[Parameter, EditorRequired]
+public PaginationState Pagination { get; set; } = new();
+
+/// <summary>
+/// Template d'affichage.
+/// </summary>
+[Parameter]
+public string? Template { get; set; }
+
+private string ResolvedTemplate => Template ?? Localization.GetString("Pagination.Template");
 
     /// <summary>
     /// Afficher le s�lecteur de taille de page.
@@ -70,7 +76,7 @@
         ? "mudext-pagination-info"
         : $"mudext-pagination-info {Class}";
 
-    private string FormattedText => Template
+    private string FormattedText => ResolvedTemplate
         .Replace("{from}", Pagination.DisplayFrom.ToString())
         .Replace("{to}", Pagination.DisplayTo.ToString())
         .Replace("{total}", Pagination.TotalItems.ToString())

@@ -47,7 +47,7 @@
            Icon="@Icons.Material.Filled.Notifications"
            Badge="@(_notifications.Count > 0 ? _notifications.Count.ToString() : null)"
            OnClick="@(async () => _isOpen = !_isOpen)">
-    Notifications
+    @Localization.GetString("Notifications.ButtonLabel")
 </MudButton>
 
 @code {

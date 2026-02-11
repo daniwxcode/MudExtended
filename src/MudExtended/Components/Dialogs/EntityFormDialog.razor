@@ -1,5 +1,6 @@
 @using MudBlazor
 @using MudExtended.Models.Configuration
+@using MudExtended.Services.Localization
 @typeparam TEntity
 @typeparam TCreateCommand
 @typeparam TUpdateCommand
@@ -13,14 +14,14 @@
         {
             <div class="d-flex flex-column align-center pa-8">
                 <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.body2" Class="mt-4">Loading...</MudText>
+                <MudText Typo="Typo.body2" Class="mt-4">@Localization.GetString("EntityForm.Loading")</MudText>
             </div>
         }
         else if (_isSaving)
         {
             <div class="d-flex flex-column align-center pa-8">
                 <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
-                <MudText Typo="Typo.body2" Class="mt-4">Saving...</MudText>
+                <MudText Typo="Typo.body2" Class="mt-4">@Localization.GetString("EntityForm.Saving")</MudText>
             </div>
         }
         else
@@ -42,26 +43,29 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel" Variant="Variant.Text" Disabled="@_isSaving">
-            Cancel
+            @Localization.GetString("Dialog.CancelButton")
         </MudButton>
         <MudButton OnClick="Submit" 
                    Variant="Variant.Filled" 
                    Color="Color.Primary" 
                    Disabled="@(!_isFormValid || _isSaving || _isLoading)">
-            @(IsCreate ? CreateButtonText : UpdateButtonText)
+            @(IsCreate ? ResolvedCreateButtonText : ResolvedUpdateButtonText)
         </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
 [CascadingParameter]
-private IMudDialogInstance MudDialog { get; set; } = default!;
+    private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
     [Inject]
     private MudExtendedOptions Options { get; set; } = default!;
+
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
 
     #region Parameters
 
@@ -123,13 +127,13 @@ private IMudDialogInstance MudDialog { get; set; } = default!;
     /// Create title prefix.
     /// </summary>
     [Parameter]
-    public string CreateTitle { get; set; } = "Create";
+    public string? CreateTitle { get; set; }
 
     /// <summary>
     /// Edit title prefix.
     /// </summary>
     [Parameter]
-    public string EditTitle { get; set; } = "Edit";
+    public string? EditTitle { get; set; }
 
     /// <summary>
     /// Entity name for title.
@@ -147,13 +151,18 @@ private IMudDialogInstance MudDialog { get; set; } = default!;
     /// Create button text.
     /// </summary>
     [Parameter]
-    public string CreateButtonText { get; set; } = "Create";
+    public string? CreateButtonText { get; set; }
 
     /// <summary>
     /// Update button text.
     /// </summary>
     [Parameter]
-    public string UpdateButtonText { get; set; } = "Save";
+    public string? UpdateButtonText { get; set; }
+
+    private string ResolvedCreateTitle => CreateTitle ?? Localization.GetString("EntityForm.CreateTitle");
+    private string ResolvedEditTitle => EditTitle ?? Localization.GetString("EntityForm.EditTitle");
+    private string ResolvedCreateButtonText => CreateButtonText ?? Localization.GetString("EntityForm.CreateButton");
+    private string ResolvedUpdateButtonText => UpdateButtonText ?? Localization.GetString("EntityForm.SaveButton");
 
     /// <summary>
     /// Event after successful save.
@@ -190,7 +199,7 @@ private IMudDialogInstance MudDialog { get; set; } = default!;
             if (!string.IsNullOrWhiteSpace(Title))
                 return Title;
 
-            var prefix = IsCreate ? CreateTitle : EditTitle;
+            var prefix = IsCreate ? ResolvedCreateTitle : ResolvedEditTitle;
             return string.IsNullOrWhiteSpace(EntityName)
                 ? prefix
                 : $"{prefix} {EntityName}";
@@ -241,10 +250,10 @@ private IMudDialogInstance MudDialog { get; set; } = default!;
             }
             else
             {
-                throw new InvalidOperationException("Configuration invalide du dialog");
+                throw new InvalidOperationException(Localization.GetString("EntityForm.InvalidConfig"));
             }
 
-            var message = SuccessMessage ?? (IsCreate ? "�l�ment cr�� avec succ�s" : "�l�ment modifi� avec succ�s");
+            var message = SuccessMessage ?? (IsCreate ? Localization.GetString("EntityForm.SuccessCreate") : Localization.GetString("EntityForm.SuccessUpdate"));
             Snackbar.Add(message, Severity.Success);
 
             await OnSuccess.InvokeAsync(result);
@@ -252,11 +261,11 @@ private IMudDialogInstance MudDialog { get; set; } = default!;
         }
         catch (HttpRequestException ex)
         {
-            _errorMessage = $"Erreur: {ex.Message}";
+            _errorMessage = Localization.GetString("EntityForm.Error", ex.Message);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Erreur inattendue: {ex.Message}";
+            _errorMessage = Localization.GetString("EntityForm.UnexpectedError", ex.Message);
         }
         finally
         {

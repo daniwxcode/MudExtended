@@ -187,6 +187,47 @@ public sealed class LocalizationService : ILocalizationService
         AddResource("Pagination.PageOf", ("Page {0} sur {1}", "Page {0} of {1}", "Página {0} de {1}"));
         AddResource("Pagination.ItemsPerPage", ("Éléments par page", "Items per page", "Elementos por página"));
         AddResource("Pagination.Total", ("Total", "Total", "Total"));
+        AddResource("Pagination.Template", ("{from} à {to} sur {total}", "{from} to {to} of {total}", "{from} a {to} de {total}"));
+
+        // Dialog (defaults)
+        AddResource("Dialog.Title.Confirmation", ("Confirmation", "Confirmation", "Confirmación"));
+        AddResource("Dialog.Title.Message", ("Message", "Message", "Mensaje"));
+        AddResource("Dialog.Title.Information", ("Information", "Information", "Información"));
+        AddResource("Dialog.Title.Success", ("Succès", "Success", "Éxito"));
+        AddResource("Dialog.Title.Warning", ("Avertissement", "Warning", "Advertencia"));
+        AddResource("Dialog.Title.Error", ("Erreur", "Error", "Error"));
+        AddResource("Dialog.Title.Question", ("Question", "Question", "Pregunta"));
+        AddResource("Dialog.OK", ("OK", "OK", "OK"));
+        AddResource("Dialog.Continue", ("Continuer", "Continue", "Continuar"));
+        AddResource("Dialog.Yes", ("Oui", "Yes", "Sí"));
+        AddResource("Dialog.No", ("Non", "No", "No"));
+        AddResource("Dialog.ConfirmDeleteMessage", ("Êtes-vous sûr de vouloir supprimer {0} ? Cette action est irréversible.", "Are you sure you want to delete {0}? This action cannot be undone.", "¿Está seguro de que desea eliminar {0}? Esta acción no se puede deshacer."));
+        AddResource("Dialog.ConfirmDeleteTitle", ("Confirmer la suppression", "Confirm Deletion", "Confirmar eliminación"));
+        AddResource("Dialog.DeleteButton", ("Supprimer", "Delete", "Eliminar"));
+
+        // EntityFormDialog
+        AddResource("EntityForm.Loading", ("Chargement...", "Loading...", "Cargando..."));
+        AddResource("EntityForm.Saving", ("Enregistrement...", "Saving...", "Guardando..."));
+        AddResource("EntityForm.CreateTitle", ("Créer", "Create", "Crear"));
+        AddResource("EntityForm.EditTitle", ("Modifier", "Edit", "Editar"));
+        AddResource("EntityForm.CreateButton", ("Créer", "Create", "Crear"));
+        AddResource("EntityForm.SaveButton", ("Enregistrer", "Save", "Guardar"));
+        AddResource("EntityForm.SuccessCreate", ("Élément créé avec succès", "Item created successfully", "Elemento creado con éxito"));
+        AddResource("EntityForm.SuccessUpdate", ("Élément modifié avec succès", "Item updated successfully", "Elemento actualizado con éxito"));
+        AddResource("EntityForm.Error", ("Erreur : {0}", "Error: {0}", "Error: {0}"));
+        AddResource("EntityForm.UnexpectedError", ("Erreur inattendue : {0}", "Unexpected error: {0}", "Error inesperado: {0}"));
+        AddResource("EntityForm.InvalidConfig", ("Configuration invalide du dialog", "Invalid dialog configuration", "Configuración de diálogo inválida"));
+
+        // BulkActions (missing)
+        AddResource("BulkActions.SelectAll", ("Tous sélectionnés", "All selected", "Todos seleccionados"));
+
+        // Notifications (button label)
+        AddResource("Notifications.ButtonLabel", ("Notifications", "Notifications", "Notificaciones"));
+
+        // Table dialog titles
+        AddResource("Table.CreateDialogTitle", ("Créer", "Create", "Crear"));
+        AddResource("Table.EditDialogTitle", ("Modifier", "Edit", "Editar"));
+        AddResource("Table.DeleteItem", ("cet élément", "this item", "este elemento"));
     }
 
     private void AddResource(string key, (string French, string English, string Spanish) values)

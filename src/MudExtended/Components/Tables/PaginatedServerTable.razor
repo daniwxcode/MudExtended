@@ -459,7 +459,7 @@
         };
 
         var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
-        var dialog = await DialogService.ShowAsync(CreateDialogType, "Cr�er", parameters, options);
+        var dialog = await DialogService.ShowAsync(CreateDialogType, Localization.AddButton, parameters, options);
         var result = await dialog.Result;
 
         if (result is { Canceled: false })
@@ -485,7 +485,7 @@
         }
 
         var options = Options?.DefaultDialogConfiguration?.ToDialogOptions() ?? new();
-        var dialog = await DialogService.ShowAsync(EditDialogType, "Modifier", parameters, options);
+        var dialog = await DialogService.ShowAsync(EditDialogType, Localization.EditAction, parameters, options);
         var result = await dialog.Result;
 
         if (result is { Canceled: false })
@@ -499,7 +499,7 @@
     {
         if (DeleteFunc is null) return;
 
-        var confirmed = await DialogService.ConfirmDeleteAsync("cet �l�ment");
+        var confirmed = await DialogService.ConfirmDeleteAsync(LocalizationSvc.GetString("Table.DeleteItem"));
         if (!confirmed) return;
 
         var success = await DeleteFunc(entity);

@@ -1,6 +1,7 @@
 using MudBlazor;
 using MudExtended.Components.Dialogs;
 using MudExtended.Enums;
+using MudExtended.Services.Localization;
 
 namespace MudExtended.Extensions;
 
@@ -16,27 +17,31 @@ public static class DialogServiceExtensions
     /// </summary>
     /// <param name="dialogService">Dialog service.</param>
     /// <param name="message">Confirmation message.</param>
-    /// <param name="title">Dialog title.</param>
+    /// <param name="title">Dialog title (localized by default).</param>
     /// <param name="type">Confirmation type.</param>
-    /// <param name="confirmText">Confirm button text.</param>
-    /// <param name="cancelText">Cancel button text.</param>
+    /// <param name="confirmText">Confirm button text (localized by default).</param>
+    /// <param name="cancelText">Cancel button text (localized by default).</param>
     /// <returns>True if confirmed.</returns>
     public static async Task<bool> ConfirmAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Confirmation",
+        string? title = null,
         ConfirmationType type = ConfirmationType.Info,
-        string confirmText = "Confirm",
-        string cancelText = "Cancel")
+        string? confirmText = null,
+        string? cancelText = null)
     {
         var parameters = new DialogParameters<ConfirmationDialog>
         {
-            { x => x.Title, title },
             { x => x.Message, message },
-            { x => x.Type, type },
-            { x => x.ConfirmText, confirmText },
-            { x => x.CancelText, cancelText }
+            { x => x.Type, type }
         };
+
+        if (title is not null)
+            parameters.Add(x => x.Title, title);
+        if (confirmText is not null)
+            parameters.Add(x => x.ConfirmText, confirmText);
+        if (cancelText is not null)
+            parameters.Add(x => x.CancelText, cancelText);
 
         var options = new DialogOptions
         {
@@ -65,14 +70,12 @@ public static class DialogServiceExtensions
         string itemName,
         string? customMessage = null)
     {
-        var message = customMessage ?? $"Are you sure you want to delete {itemName}? This action cannot be undone.";
-        
         return dialogService.ConfirmAsync(
-            message,
-            "Confirm Deletion",
+            customMessage ?? string.Format("Are you sure you want to delete {0}? This action cannot be undone.", itemName),
+            null,
             ConfirmationType.Danger,
-            "Delete",
-            "Cancel");
+            null,
+            null);
     }
 
     /// <summary>
@@ -86,15 +89,15 @@ public static class DialogServiceExtensions
     public static Task<bool> ConfirmDangerAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Warning",
-        string confirmText = "Continue")
+        string? title = null,
+        string? confirmText = null)
     {
         return dialogService.ConfirmAsync(
             message,
             title,
             ConfirmationType.Danger,
             confirmText,
-            "Cancel");
+            null);
     }
 
     /// <summary>
@@ -108,15 +111,15 @@ public static class DialogServiceExtensions
     public static Task<bool> ConfirmWarningAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Warning",
-        string confirmText = "Continue")
+        string? title = null,
+        string? confirmText = null)
     {
         return dialogService.ConfirmAsync(
             message,
             title,
             ConfirmationType.Warning,
             confirmText,
-            "Cancel");
+            null);
     }
 
     #endregion
@@ -134,18 +137,21 @@ public static class DialogServiceExtensions
     public static async Task ShowMessageAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Message",
+        string? title = null,
         MessageSeverity severity = MessageSeverity.Info,
-        string okText = "OK")
+        string? okText = null)
     {
         var parameters = new DialogParameters<MessageDialog>
         {
-            { x => x.Title, title },
             { x => x.Message, message },
             { x => x.Severity, severity },
-            { x => x.OkText, okText },
             { x => x.ShowCancelButton, false }
         };
+
+        if (title is not null)
+            parameters.Add(x => x.Title, title);
+        if (okText is not null)
+            parameters.Add(x => x.OkText, okText);
 
         var options = new DialogOptions
         {
@@ -169,7 +175,7 @@ public static class DialogServiceExtensions
     public static Task ShowInfoAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Information")
+        string? title = null)
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Info);
     }
@@ -183,7 +189,7 @@ public static class DialogServiceExtensions
     public static Task ShowSuccessAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Success")
+        string? title = null)
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Success);
     }
@@ -197,7 +203,7 @@ public static class DialogServiceExtensions
     public static Task ShowWarningAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Warning")
+        string? title = null)
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Warning);
     }
@@ -211,7 +217,7 @@ public static class DialogServiceExtensions
     public static Task ShowErrorAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Error")
+        string? title = null)
     {
         return dialogService.ShowMessageAsync(message, title, MessageSeverity.Error);
     }
@@ -227,17 +233,18 @@ public static class DialogServiceExtensions
         this IDialogService dialogService,
         string message,
         string details,
-        string title = "Error")
+        string? title = null)
     {
         var parameters = new DialogParameters<MessageDialog>
         {
-            { x => x.Title, title },
             { x => x.Message, message },
             { x => x.SecondaryMessage, details },
             { x => x.Severity, MessageSeverity.Error },
-            { x => x.OkText, "OK" },
             { x => x.ShowCancelButton, false }
         };
+
+        if (title is not null)
+            parameters.Add(x => x.Title, title);
 
         var options = new DialogOptions
         {
@@ -263,18 +270,18 @@ public static class DialogServiceExtensions
     public static async Task<bool> ShowYesNoAsync(
         this IDialogService dialogService,
         string message,
-        string title = "Question",
+        string? title = null,
         MessageSeverity severity = MessageSeverity.Info)
     {
         var parameters = new DialogParameters<MessageDialog>
         {
-            { x => x.Title, title },
             { x => x.Message, message },
             { x => x.Severity, severity },
-            { x => x.OkText, "Yes" },
-            { x => x.CancelText, "No" },
             { x => x.ShowCancelButton, true }
         };
+
+        if (title is not null)
+            parameters.Add(x => x.Title, title);
 
         var options = new DialogOptions
         {
