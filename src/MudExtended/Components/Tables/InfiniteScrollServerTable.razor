@@ -5,6 +5,7 @@
 @using MudExtended.Extensions
 @using MudExtended.Models.Pagination
 @using MudExtended.Models.Configuration
+@using MudExtended.Services.Localization
 @typeparam TEntity
 @inherits AuthorizedComponentBase
 
@@ -149,6 +150,9 @@
 
     [Inject]
     private MudExtendedOptions Options { get; set; } = default!;
+
+    [Inject]
+    private ILocalizationService LocalizationSvc { get; set; } = default!;
 
     #region Parameters - Required
 
@@ -353,7 +357,7 @@
     /// <inheritdoc/>
     protected override string Resource => ResourceName;
 
-    private TableLocalization Localization => LocalizationOverride ?? Options?.DefaultTableLocalization ?? new();
+    private TableLocalization Localization => LocalizationOverride ?? TableLocalization.FromLocalizationService(LocalizationSvc);
 
     private string CombinedClass => string.IsNullOrWhiteSpace(Class)
         ? "mudext-table-container"

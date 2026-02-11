@@ -1,6 +1,7 @@
 @using MudBlazor
 @using MudExtended.Models.Export
 @using MudExtended.Services.Export
+@using MudExtended.Services.Localization
 @typeparam TEntity
 
 <MudTooltip Text="@TooltipText">
@@ -15,32 +16,32 @@
             <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Csv))">
                 <div class="d-flex align-center gap-2">
                     <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" />
-                    <span>Export as CSV</span>
+                    <span>@Localization.GetString("DataExporter.ExportAsCsv")</span>
                 </div>
             </MudMenuItem>
             <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Json))">
                 <div class="d-flex align-center gap-2">
                     <MudIcon Icon="@Icons.Material.Filled.DataObject" Size="Size.Small" />
-                    <span>Export as JSON</span>
+                    <span>@Localization.GetString("DataExporter.ExportAsJson")</span>
                 </div>
             </MudMenuItem>
             <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Excel))">
                 <div class="d-flex align-center gap-2">
                     <MudIcon Icon="@Icons.Material.Filled.TableChart" Size="Size.Small" />
-                    <span>Export as Excel</span>
+                    <span>@Localization.GetString("DataExporter.ExportAsExcel")</span>
                 </div>
             </MudMenuItem>
             <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Xml))">
                 <div class="d-flex align-center gap-2">
                     <MudIcon Icon="@Icons.Material.Filled.Tag" Size="Size.Small" />
-                    <span>Export as XML</span>
+                    <span>@Localization.GetString("DataExporter.ExportAsXml")</span>
                 </div>
             </MudMenuItem>
             <MudDivider Class="my-2" />
             <MudMenuItem OnClick="ShowExportDialog">
                 <div class="d-flex align-center gap-2">
                     <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Small" />
-                    <span>Export Settings</span>
+                    <span>@Localization.GetString("DataExporter.ExportSettings")</span>
                 </div>
             </MudMenuItem>
         </ChildContent>
@@ -48,6 +49,9 @@
 </MudTooltip>
 
 @code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
+
     [Inject]
     private IDataExportService ExportService { get; set; } = default!;
 
@@ -103,13 +107,13 @@
 
     private bool HasData => Items?.Count > 0;
 
-    private string TooltipText => !HasData ? "No data to export" : "Export data";
+    private string TooltipText => !HasData ? Localization.GetString("DataExporter.NoData") : Localization.GetString("DataExporter.Tooltip");
 
     private async Task ExportAsync(ExportFormat format)
     {
         if (!HasData)
         {
-            Snackbar.Add("No data to export", Severity.Warning);
+            Snackbar.Add(Localization.GetString("DataExporter.NoData"), Severity.Warning);
             return;
         }
 
@@ -131,12 +135,12 @@
             // Trigger download
             await DownloadFileAsync(data, format);
 
-            Snackbar.Add($"Exported successfully as {format}", Severity.Success);
+            Snackbar.Add(Localization.GetString("DataExporter.ExportSuccess", format), Severity.Success);
             await OnExported.InvokeAsync(format);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Export failed: {ex.Message}", Severity.Error);
+            Snackbar.Add(Localization.GetString("DataExporter.ExportError", ex.Message), Severity.Error);
             await OnExportError.InvokeAsync(ex.Message);
         }
         finally

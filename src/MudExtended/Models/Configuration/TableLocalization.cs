@@ -1,7 +1,9 @@
+using MudExtended.Services.Localization;
+
 namespace MudExtended.Models.Configuration;
 
 /// <summary>
-/// Localized texts for tables.
+/// Localized texts for tables. Supports multilingual via ILocalizationService.
 /// </summary>
 public record TableLocalization
 {
@@ -43,4 +45,24 @@ public record TableLocalization
 
     /// <summary>Delete confirmation dialog message.</summary>
     public string ConfirmDeleteMessage { get; init; } = "Are you sure you want to delete this item?";
+
+    /// <summary>
+    /// Creates a TableLocalization populated from ILocalizationService (multilingual).
+    /// </summary>
+    public static TableLocalization FromLocalizationService(ILocalizationService localization) => new()
+    {
+        AddButton = localization.GetString("Table.AddButton"),
+        RefreshButton = localization.GetString("Table.RefreshButton"),
+        SearchPlaceholder = localization.GetString("Table.SearchPlaceholder"),
+        ActionsColumn = localization.GetString("Table.ActionsColumn"),
+        EditAction = localization.GetString("Table.EditAction"),
+        DeleteAction = localization.GetString("Table.DeleteAction"),
+        DetailsAction = localization.GetString("Table.DetailsAction"),
+        NoRecordsMessage = localization.GetString("Table.NoRecords"),
+        LoadingMessage = localization.GetString("Table.Loading"),
+        RowsPerPage = localization.GetString("Table.RowsPerPage"),
+        PaginationFormat = localization.GetString("Table.PaginationFormat"),
+        ConfirmDeleteTitle = localization.GetString("Table.ConfirmDeleteTitle"),
+        ConfirmDeleteMessage = localization.GetString("Table.ConfirmDeleteMessage")
+    };
 }

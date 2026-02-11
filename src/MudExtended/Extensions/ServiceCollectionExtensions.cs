@@ -2,7 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using MudExtended.Mappings;
 using MudExtended.Models.Configuration;
 using MudExtended.Services.Api;
+using MudExtended.Services.Audit;
+using MudExtended.Services.Export;
 using MudExtended.Services.Loading;
+using MudExtended.Services.Localization;
 using MudExtended.Services.Permissions;
 
 namespace MudExtended.Extensions;
@@ -13,11 +16,11 @@ namespace MudExtended.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Ajoute les services MudExtended au conteneur de d�pendances.
+    /// Ajoute tous les services MudExtended au conteneur de dépendances.
     /// </summary>
     /// <param name="services">Collection de services.</param>
     /// <param name="configure">Action de configuration optionnelle.</param>
-    /// <returns>Collection de services pour cha�nage.</returns>
+    /// <returns>Collection de services pour chaînage.</returns>
     public static IServiceCollection AddMudExtended(
         this IServiceCollection services,
         Action<MudExtendedOptions>? configure = null)
@@ -28,9 +31,21 @@ public static class ServiceCollectionExtensions
         // Options de configuration
         services.AddSingleton(options);
 
-        // Services
+        // Localisation multilingue (EN, FR, ES)
+        services.AddScoped<ILocalizationService, LocalizationService>();
+
+        // Services métier
         services.AddScoped<IApiExecutor, ApiExecutor>();
         services.AddScoped<LoaderService>();
+
+        // Export de données (CSV, JSON, XML, Excel, PDF)
+        services.AddScoped<IDataExportService, DataExportService>();
+
+        // Journalisation d'audit
+        if (options.EnableAuditLogging)
+        {
+            services.AddScoped<IAuditService, InMemoryAuditService>();
+        }
 
         // Service de permissions (nécessite AuthenticationStateProvider et IAuthorizationService)
         if (options.UsePermissionService)

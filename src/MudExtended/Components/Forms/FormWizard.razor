@@ -1,5 +1,6 @@
 @using MudBlazor
 @using MudExtended.Models.Forms
+@using MudExtended.Services.Localization
 
 <div class="mudext-wizard">
     <MudStepper Linear="@Linear">
@@ -28,20 +29,20 @@
                     @if (_currentStepIndex > 0)
                     {
                         <MudButton Variant="Variant.Outlined" OnClick="PreviousStepAsync">
-                            Previous
+                            @Localization.GetString("FormWizard.Previous")
                         </MudButton>
                     }
 
                     @if (_currentStepIndex < Steps.Count - 1)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextStepAsync">
-                            Next
+                            @Localization.GetString("FormWizard.Next")
                         </MudButton>
                     }
                     else
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="CompleteAsync">
-                            Complete
+                            @Localization.GetString("FormWizard.Complete")
                         </MudButton>
                     }
                 </div>
@@ -51,6 +52,8 @@
 </div>
 
 @code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
     /// <summary>
     /// Wizard steps.
     /// </summary>
@@ -105,7 +108,7 @@
             var isValid = await ValidateStep(currentStep);
             if (!isValid)
             {
-                await OnValidationError.InvokeAsync("Current step validation failed");
+                await OnValidationError.InvokeAsync(Localization.GetString("FormWizard.StepValidationFailed"));
                 return;
             }
         }
@@ -137,7 +140,7 @@
             var isValid = await ValidateStep(currentStep);
             if (!isValid)
             {
-                await OnValidationError.InvokeAsync("Final step validation failed");
+                await OnValidationError.InvokeAsync(Localization.GetString("FormWizard.FinalValidationFailed"));
                 return;
             }
         }
