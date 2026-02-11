@@ -1,0 +1,161 @@
+@using MudBlazor
+@using MudExtended.Components.Bulk
+@using MudExtended.Services.Localization
+
+@if (SelectedCount > 0)
+{
+    <MudPaper Class="mudext-bulk-bar" Elevation="2">
+        <div class="mudext-bulk-bar__content">
+            <div class="mudext-bulk-bar__info">
+                <MudCheckbox T="bool" 
+                             Checked="@IsAllSelected"
+                             CheckedChanged="HandleSelectAll"
+                             Class="mudext-bulk-bar__checkbox" />
+                <MudText Typo="Typo.body2" Class="mudext-bulk-bar__selection-text">
+                    @if (IsAllSelected)
+                    {
+                        @Localization.GetString("BulkActions.SelectAll")
+                    }
+                    else
+                    {
+                        @Localization.GetString("BulkActions.Selected", SelectedCount)
+                    }
+                </MudText>
+                @if (SelectionStats is not null)
+                {
+                    @SelectionStats
+                }
+            </div>
+
+            <div class="mudext-bulk-bar__actions">
+                @if (Actions is not null && Actions.Count > 0)
+                {
+                    @foreach (var action in Actions)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Size="Size.Small"
+                                   Color="@action.Color"
+                                   StartIcon="@action.Icon"
+                                   OnClick="@(() => HandleAction(action))"
+                                   Class="mudext-bulk-bar__action-btn"
+                                   Disabled="@action.IsDisabled">
+                            @action.Label
+                        </MudButton>
+                    }
+                }
+
+                <MudButton Variant="Variant.Text"
+                           Size="Size.Small"
+                           OnClick="HandleClearSelection"
+                           Class="mudext-bulk-bar__clear-btn">
+                    @Localization.GetString("BulkActions.Clear")
+                </MudButton>
+            </div>
+        </div>
+    </MudPaper>
+}
+
+@code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
+
+    /// <summary>
+    /// Number of selected items.
+    /// </summary>
+    [Parameter]
+    public int SelectedCount { get; set; }
+
+    /// <summary>
+    /// Total items count (for select all functionality).
+    /// </summary>
+    [Parameter]
+    public int TotalCount { get; set; }
+
+    /// <summary>
+    /// Available bulk actions.
+    /// </summary>
+    [Parameter]
+    public List<BulkAction> Actions { get; set; } = [];
+
+    /// <summary>
+    /// Custom selection stats display.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? SelectionStats { get; set; }
+
+    /// <summary>
+    /// Fired when an action is selected.
+    /// </summary>
+    [Parameter]
+    public EventCallback<BulkAction> OnAction { get; set; }
+
+    /// <summary>
+    /// Fired when select all is toggled.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> OnSelectAllChanged { get; set; }
+
+    /// <summary>
+    /// Fired when selection is cleared.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnSelectionCleared { get; set; }
+
+    private bool IsAllSelected => SelectedCount == TotalCount && TotalCount > 0;
+
+    private async Task HandleAction(BulkAction action)
+    {
+        await OnAction.InvokeAsync(action);
+    }
+
+    private async Task HandleSelectAll(bool value)
+    {
+        await OnSelectAllChanged.InvokeAsync(value);
+    }
+
+    private async Task HandleClearSelection()
+    {
+        await OnSelectionCleared.InvokeAsync();
+    }
+}
+
+/// <summary>
+/// Bulk action definition.
+/// </summary>
+public record BulkAction
+{
+    /// <summary>
+    /// Unique action identifier.
+    /// </summary>
+    public required string Id { get; init; }
+
+    /// <summary>
+    /// Display label.
+    /// </summary>
+    public required string Label { get; init; }
+
+    /// <summary>
+    /// Icon name.
+    /// </summary>
+    public string? Icon { get; init; }
+
+    /// <summary>
+    /// Button color.
+    /// </summary>
+    public Color Color { get; init; } = Color.Primary;
+
+    /// <summary>
+    /// Requires confirmation?
+    /// </summary>
+    public bool RequiresConfirmation { get; init; }
+
+    /// <summary>
+    /// Confirmation message.
+    /// </summary>
+    public string? ConfirmationMessage { get; init; }
+
+    /// <summary>
+    /// Is action disabled?
+    /// </summary>
+    public bool IsDisabled { get; init; }
+}

@@ -1,0 +1,65 @@
+.mudext-bulk-bar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--mud-palette-surface);
+    border-top: 2px solid var(--mud-palette-divider);
+    z-index: 100;
+}
+
+.mudext-bulk-bar__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.mudext-bulk-bar__info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mudext-bulk-bar__checkbox {
+    margin-right: 0.5rem;
+}
+
+.mudext-bulk-bar__selection-text {
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.mudext-bulk-bar__actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mudext-bulk-bar__action-btn {
+    text-transform: none !important;
+    white-space: nowrap;
+}
+
+.mudext-bulk-bar__clear-btn {
+    margin-left: 0.5rem;
+    text-transform: none !important;
+}
+
+@media (max-width: 768px) {
+    .mudext-bulk-bar__content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mudext-bulk-bar__info {
+        justify-content: space-between;
+    }
+
+    .mudext-bulk-bar__actions {
+        justify-content: center;
+    }
+}

@@ -1,0 +1,166 @@
+@using MudBlazor
+@using MudExtended.Models.Export
+@using MudExtended.Services.Export
+@typeparam TEntity
+
+<MudTooltip Text="@TooltipText">
+    <MudMenu>
+        <ActivatorContent>
+            <MudIconButton Icon="@Icons.Material.Filled.Download"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           Disabled="@(!HasData || IsExporting)" />
+        </ActivatorContent>
+        <ChildContent>
+            <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Csv))">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" />
+                    <span>Export as CSV</span>
+                </div>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Json))">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.DataObject" Size="Size.Small" />
+                    <span>Export as JSON</span>
+                </div>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Excel))">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.TableChart" Size="Size.Small" />
+                    <span>Export as Excel</span>
+                </div>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => ExportAsync(ExportFormat.Xml))">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Tag" Size="Size.Small" />
+                    <span>Export as XML</span>
+                </div>
+            </MudMenuItem>
+            <MudDivider Class="my-2" />
+            <MudMenuItem OnClick="ShowExportDialog">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Small" />
+                    <span>Export Settings</span>
+                </div>
+            </MudMenuItem>
+        </ChildContent>
+    </MudMenu>
+</MudTooltip>
+
+@code {
+    [Inject]
+    private IDataExportService ExportService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
+
+    /// <summary>
+    /// Data items to export.
+    /// </summary>
+    [Parameter]
+    public List<TEntity> Items { get; set; } = [];
+
+    /// <summary>
+    /// Export columns configuration.
+    /// </summary>
+    [Parameter]
+    public List<ExportColumn> Columns { get; set; } = [];
+
+    /// <summary>
+    /// Base file name for export.
+    /// </summary>
+    [Parameter]
+    public string FileName { get; set; } = "export";
+
+    /// <summary>
+    /// Include headers in export.
+    /// </summary>
+    [Parameter]
+    public bool IncludeHeaders { get; set; } = true;
+
+    /// <summary>
+    /// Show row numbers.
+    /// </summary>
+    [Parameter]
+    public bool ShowRowNumbers { get; set; }
+
+    /// <summary>
+    /// Fired after successful export.
+    /// </summary>
+    [Parameter]
+    public EventCallback<ExportFormat> OnExported { get; set; }
+
+    /// <summary>
+    /// Fired on export error.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnExportError { get; set; }
+
+    private bool IsExporting { get; set; }
+
+    private bool HasData => Items?.Count > 0;
+
+    private string TooltipText => !HasData ? "No data to export" : "Export data";
+
+    private async Task ExportAsync(ExportFormat format)
+    {
+        if (!HasData)
+        {
+            Snackbar.Add("No data to export", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            IsExporting = true;
+
+            var options = new ExportOptions
+            {
+                FileName = FileName,
+                IncludeHeaders = IncludeHeaders,
+                IncludeRowNumbers = ShowRowNumbers,
+                Columns = Columns,
+                IncludeTimestamp = true
+            };
+
+            var data = await ExportService.ExportAsync(Items, format, options);
+
+            // Trigger download
+            await DownloadFileAsync(data, format);
+
+            Snackbar.Add($"Exported successfully as {format}", Severity.Success);
+            await OnExported.InvokeAsync(format);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Export failed: {ex.Message}", Severity.Error);
+            await OnExportError.InvokeAsync(ex.Message);
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    private async Task ShowExportDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            ["FileName"] = FileName,
+            ["Columns"] = Columns
+        };
+
+        // TODO: Create ExportSettingsDialog component
+        // var dialog = await DialogService.ShowAsync<ExportSettingsDialog>("Export Settings", parameters);
+    }
+
+    private async Task DownloadFileAsync(byte[] data, ExportFormat format)
+    {
+        // This requires JavaScript interop to trigger browser download
+        // Implementation depends on your JS bridge
+        await Task.CompletedTask;
+    }
+}

@@ -1,0 +1,83 @@
+@using MudBlazor
+@using MudExtended.Models.Audit
+@using MudExtended.Services.Localization
+
+<MudDrawer @bind-Open="_isOpen" Anchor="Anchor.End" Width="400px" Elevation="16">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6">@Localization.GetString("Notifications.Title")</MudText>
+        @if (_notifications.Count > 0)
+        {
+            <MudSpacer />
+            <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ClearAllAsync">
+                @Localization.GetString("Notifications.ClearAll")
+            </MudButton>
+        }
+    </MudDrawerHeader>
+
+    <MudDivider />
+
+    @if (_notifications.Count == 0)
+    {
+        <MudText Typo="Typo.body2" Class="pa-4">
+            @Localization.GetString("Notifications.NoNotifications")
+        </MudText>
+    }
+    else
+    {
+        <MudList T="Notification">
+            @foreach (var notification in _notifications)
+            {
+                <MudListItem T="Notification">
+                    <MudAlert Severity="@notification.Severity" Dense="true" Class="mud-width-full">
+                        <div class="d-flex justify-space-between align-center">
+                            <span>@notification.Message</span>
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveNotificationAsync(notification.Id))" />
+                        </div>
+                    </MudAlert>
+                </MudListItem>
+            }
+        </MudList>
+    }
+</MudDrawer>
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Primary"
+           Icon="@Icons.Material.Filled.Notifications"
+           Badge="@(_notifications.Count > 0 ? _notifications.Count.ToString() : null)"
+           OnClick="@(async () => _isOpen = !_isOpen)">
+    Notifications
+</MudButton>
+
+@code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
+
+    public record Notification(string Id, string Message, Severity Severity, DateTime CreatedAt);
+
+    private bool _isOpen;
+    private readonly List<Notification> _notifications = [];
+
+    public void AddNotification(string message, Severity severity = Severity.Info)
+    {
+        _notifications.Add(new Notification(Guid.NewGuid().ToString(), message, severity, DateTime.UtcNow));
+        StateHasChanged();
+    }
+
+    private async Task RemoveNotificationAsync(string id)
+    {
+        var notification = _notifications.FirstOrDefault(n => n.Id == id);
+        if (notification != null)
+        {
+            _notifications.Remove(notification);
+            await Task.CompletedTask;
+        }
+    }
+
+    private async Task ClearAllAsync()
+    {
+        _notifications.Clear();
+        await Task.CompletedTask;
+    }
+}

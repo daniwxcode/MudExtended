@@ -1,0 +1,148 @@
+@using MudBlazor
+@using MudExtended.Models.Forms
+
+<div class="mudext-wizard">
+    <MudStepper Linear="@Linear">
+        @foreach (var step in Steps)
+        {
+            <MudStep Title="@step.Title" Optional="@step.IsOptional">
+                @if (!string.IsNullOrWhiteSpace(step.Description))
+                {
+                    <MudText Typo="Typo.body2" Class="mb-4">@step.Description</MudText>
+                }
+
+                @if (step.HasError && !string.IsNullOrWhiteSpace(step.ErrorMessage))
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">
+                        @step.ErrorMessage
+                    </MudAlert>
+                }
+
+                <div class="mudext-wizard__step-content">
+                    @step.Content
+                </div>
+
+                <MudDivider Class="my-4" />
+
+                <div class="mudext-wizard__actions">
+                    @if (_currentStepIndex > 0)
+                    {
+                        <MudButton Variant="Variant.Outlined" OnClick="PreviousStepAsync">
+                            Previous
+                        </MudButton>
+                    }
+
+                    @if (_currentStepIndex < Steps.Count - 1)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextStepAsync">
+                            Next
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="CompleteAsync">
+                            Complete
+                        </MudButton>
+                    }
+                </div>
+            </MudStep>
+        }
+    </MudStepper>
+</div>
+
+@code {
+    /// <summary>
+    /// Wizard steps.
+    /// </summary>
+    [Parameter]
+    public List<WizardStep> Steps { get; set; } = [];
+
+    /// <summary>
+    /// Is wizard linear (no skip)?
+    /// </summary>
+    [Parameter]
+    public bool Linear { get; set; } = true;
+
+    /// <summary>
+    /// Allow skipping optional steps?
+    /// </summary>
+    [Parameter]
+    public bool AllowSkip { get; set; } = true;
+
+    /// <summary>
+    /// Fired when step is completed.
+    /// </summary>
+    [Parameter]
+    public EventCallback<WizardStep> OnStepCompleted { get; set; }
+
+    /// <summary>
+    /// Fired when wizard is completed.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnWizardCompleted { get; set; }
+
+    /// <summary>
+    /// Fired on validation error.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnValidationError { get; set; }
+
+    /// <summary>
+    /// Function to validate current step.
+    /// </summary>
+    [Parameter]
+    public Func<WizardStep, Task<bool>>? ValidateStep { get; set; }
+
+    private int _currentStepIndex;
+
+    private async Task NextStepAsync()
+    {
+        var currentStep = Steps[_currentStepIndex];
+
+        // Validate current step
+        if (ValidateStep != null)
+        {
+            var isValid = await ValidateStep(currentStep);
+            if (!isValid)
+            {
+                await OnValidationError.InvokeAsync("Current step validation failed");
+                return;
+            }
+        }
+
+        await OnStepCompleted.InvokeAsync(currentStep);
+
+        if (_currentStepIndex < Steps.Count - 1)
+        {
+            _currentStepIndex++;
+        }
+    }
+
+    private async Task PreviousStepAsync()
+    {
+        if (_currentStepIndex > 0)
+        {
+            _currentStepIndex--;
+        }
+        await Task.CompletedTask;
+    }
+
+    private async Task CompleteAsync()
+    {
+        var currentStep = Steps[_currentStepIndex];
+
+        // Validate final step
+        if (ValidateStep != null)
+        {
+            var isValid = await ValidateStep(currentStep);
+            if (!isValid)
+            {
+                await OnValidationError.InvokeAsync("Final step validation failed");
+                return;
+            }
+        }
+
+        await OnStepCompleted.InvokeAsync(currentStep);
+        await OnWizardCompleted.InvokeAsync();
+    }
+}

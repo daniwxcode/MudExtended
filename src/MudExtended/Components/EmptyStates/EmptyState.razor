@@ -1,0 +1,92 @@
+@using MudBlazor
+@using MudExtended.Services.Localization
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex flex-column align-center justify-center mudext-empty-state">
+    <div class="mudext-empty-state__content">
+        @if (!string.IsNullOrWhiteSpace(IconName))
+        {
+            <MudIcon Icon="@IconName" Class="mudext-empty-state__icon" />
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <MudText Typo="Typo.h5" Class="mudext-empty-state__title mt-4">
+                @Title
+            </MudText>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="mudext-empty-state__description mt-2">
+                @Description
+            </MudText>
+        }
+
+        @if (ActionButton is not null)
+        {
+            <div class="mudext-empty-state__actions mt-6">
+                @ActionButton
+            </div>
+        }
+
+        @if (Content is not null)
+        {
+            <div class="mudext-empty-state__custom-content mt-4">
+                @Content
+            </div>
+        }
+    </div>
+</MudContainer>
+
+@code {
+    [Inject]
+    private ILocalizationService? Localization { get; set; }
+
+    /// <summary>
+    /// Icon name (Material Icons).
+    /// </summary>
+    [Parameter]
+    public string? IconName { get; set; }
+
+    /// <summary>
+    /// Main title text.
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// Description text below title.
+    /// </summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Action button or call-to-action content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ActionButton { get; set; }
+
+    /// <summary>
+    /// Additional custom content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    /// <summary>
+    /// Icon color.
+    /// </summary>
+    [Parameter]
+    public Color IconColor { get; set; } = Color.Primary;
+
+    /// <summary>
+    /// Icon size.
+    /// </summary>
+    [Parameter]
+    public string IconSize { get; set; } = "64px";
+
+    /// <summary>
+    /// Additional CSS classes.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+}

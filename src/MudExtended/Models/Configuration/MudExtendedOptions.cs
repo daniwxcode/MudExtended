@@ -1,4 +1,5 @@
 using System.Globalization;
+using MudExtended.Models.Localization;
 
 namespace MudExtended.Models.Configuration;
 
@@ -7,31 +8,31 @@ namespace MudExtended.Models.Configuration;
 /// </summary>
 public class MudExtendedOptions
 {
-    /// <summary>Localisation par d�faut pour les tables.</summary>
+    /// <summary>Localisation par défaut pour les tables.</summary>
     public TableLocalization DefaultTableLocalization { get; set; } = new();
 
     /// <summary>Activer le loader global.</summary>
     public bool UseGlobalLoader { get; set; } = true;
 
-    /// <summary>Format de date par d�faut.</summary>
+    /// <summary>Format de date par défaut.</summary>
     public string DateFormat { get; set; } = "dd/MM/yyyy";
 
-    /// <summary>Format de date et heure par d�faut.</summary>
+    /// <summary>Format de date et heure par défaut.</summary>
     public string DateTimeFormat { get; set; } = "dd/MM/yyyy HH:mm";
 
-    /// <summary>Culture par d�faut.</summary>
+    /// <summary>Culture par défaut.</summary>
     public CultureInfo Culture { get; set; } = CultureInfo.GetCultureInfo("fr-FR");
 
-    /// <summary>Enregistrer les mappings de statut par d�faut.</summary>
+    /// <summary>Enregistrer les mappings de statut par défaut.</summary>
     public bool RegisterDefaultMappings { get; set; } = true;
 
-    /// <summary>Configuration par d�faut des dialogs.</summary>
+    /// <summary>Configuration par défaut des dialogs.</summary>
     public DialogConfiguration DefaultDialogConfiguration { get; set; } = new();
 
-    /// <summary>Symbole mon�taire par d�faut.</summary>
+    /// <summary>Symbole monétaire par défaut.</summary>
     public string CurrencySymbol { get; set; } = "FCFA";
 
-    /// <summary>D�lai de debounce pour la recherche (ms).</summary>
+    /// <summary>Délai de debounce pour la recherche (ms).</summary>
     public int SearchDebounceDelay { get; set; } = 300;
 
     /// <summary>Tailles de page disponibles.</summary>
@@ -45,4 +46,24 @@ public class MudExtendedOptions
     /// et IAuthorizationService soient enregistrés dans le conteneur de dépendances.
     /// </summary>
     public bool UsePermissionService { get; set; } = false;
+
+    /// <summary>
+    /// Langue par défaut pour la localisation.
+    /// </summary>
+    public SupportedLanguage DefaultLanguage { get; set; } = SupportedLanguage.English;
+
+    /// <summary>
+    /// Activer la journalisation d'audit.
+    /// </summary>
+    public bool EnableAuditLogging { get; set; } = true;
+
+    /// <summary>
+    /// Rétention des logs d'audit en jours.
+    /// </summary>
+    public int AuditLogRetentionDays { get; set; } = 90;
+
+    /// <summary>
+    /// Nombre maximum de notifications.
+    /// </summary>
+    public int MaxNotifications { get; set; } = 10;
 }

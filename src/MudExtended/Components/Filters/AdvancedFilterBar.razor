@@ -1,0 +1,234 @@
+@using MudBlazor
+@using MudExtended.Models.Filtering
+@using MudExtended.Services.Localization
+@using MudExtendedFilterOperator = MudExtended.Models.Filtering.FilterOperator
+
+<div class="mudext-filter-bar">
+    <MudPaper Class="pa-4" Elevation="2">
+        <!-- Criteria Rows -->
+        @foreach (var (index, criterion) in FilterScheme.Criteria.Select((c, i) => (i, c)))
+        {
+            <div class="mudext-filter-bar__criterion">
+                <!-- Field Selector -->
+                <MudSelect T="FilterDefinition" 
+                           Value="GetDefinition(criterion.FieldName)"
+                           ValueChanged="@((FilterDefinition? d) => OnFieldChanged(index, d))"
+                           Label="@Localization.GetString("Filter.Field")"
+                           Class="flex-grow-1">
+                    @foreach (var def in FilterScheme.Definitions)
+                    {
+                        <MudSelectItem Value="@def">@def.Label</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <!-- Operator Selector -->
+                @if (GetDefinition(criterion.FieldName) is FilterDefinition def)
+                {
+                    <MudSelect T="MudExtendedFilterOperator" 
+                               Value="criterion.Operator"
+                               ValueChanged="@((MudExtendedFilterOperator op) => OnOperatorChanged(index, op))"
+                               Label="@Localization.GetString("Filter.Operator")"
+                               Class="flex-grow-1">
+                        @foreach (var op in def.AllowedOperators)
+                        {
+                            <MudSelectItem Value="@op">@GetOperatorLabel(op)</MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+
+                <!-- Value Input -->
+                @if (criterion.Operator != MudExtendedFilterOperator.IsEmpty && criterion.Operator != MudExtendedFilterOperator.IsNotEmpty)
+                {
+                    @if (GetDefinition(criterion.FieldName)?.FieldType == FilterFieldType.Select)
+                    {
+                        <MudSelect T="object?"
+                                   Value="criterion.Value"
+                                   ValueChanged="@((object? v) => OnValueChanged(index, v))"
+                                   Label="@Localization.GetString("Filter.Value")"
+                                   Class="flex-grow-1">
+                            @foreach (var option in GetDefinition(criterion.FieldName)?.Options ?? [])
+                            {
+                                <MudSelectItem Value="@option.Value">@option.Label</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else if (criterion.Operator == MudExtendedFilterOperator.Between)
+                    {
+                        <MudTextField T="string"
+                                      Value="criterion.Value?.ToString()"
+                                      ValueChanged="@((string? v) => OnValueChanged(index, v))"
+                                      Label="@Localization.GetString("Filter.From")"
+                                      Class="flex-grow-1" />
+                        <MudTextField T="string"
+                                      Value="criterion.ValueTo?.ToString()"
+                                      ValueChanged="@((string? v) => OnValueToChanged(index, v))"
+                                      Label="@Localization.GetString("Filter.To")"
+                                      Class="flex-grow-1" />
+                    }
+                    else
+                    {
+                        <MudTextField T="string"
+                                      Value="criterion.Value?.ToString()"
+                                      ValueChanged="@((string? v) => OnValueChanged(index, v))"
+                                      Label="@Localization.GetString("Filter.Value")"
+                                      Class="flex-grow-1" />
+                    }
+                }
+
+                <!-- Remove Button -->
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               OnClick="@(() => RemoveCriterion(index))"
+                               Color="Color.Error"
+                               Size="Size.Small" />
+            </div>
+        }
+
+        <!-- Actions -->
+        <div class="mudext-filter-bar__actions mt-4">
+            <MudButton Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="AddCriterion">
+                @Localization.GetString("Filter.AddCriteria")
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Check"
+                       OnClick="ApplyFiltersAsync">
+                @Localization.GetString("Common.Filter")
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="ResetFilters">
+                @Localization.GetString("Filter.Reset")
+            </MudButton>
+        </div>
+    </MudPaper>
+</div>
+
+@code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
+
+    /// <summary>
+    /// Filter scheme configuration.
+    /// </summary>
+    [Parameter]
+    public required FilterScheme FilterScheme { get; set; }
+
+    /// <summary>
+    /// Fired when filters are applied.
+    /// </summary>
+    [Parameter]
+    public EventCallback<FilterScheme> OnFiltersApplied { get; set; }
+
+    private void AddCriterion()
+    {
+        if (FilterScheme.Definitions.Count == 0) return;
+
+        var newCriteria = new List<FilterCriterion>(FilterScheme.Criteria)
+        {
+            new()
+            {
+                FieldName = FilterScheme.Definitions.First().FieldName,
+                Operator = FilterScheme.Definitions.First().DefaultOperator
+            }
+        };
+
+        // Create new scheme with updated criteria
+        var updated = FilterScheme with { Criteria = newCriteria };
+        // Update parent reference
+    }
+
+    private void RemoveCriterion(int index)
+    {
+        if (index >= 0 && index < FilterScheme.Criteria.Count)
+        {
+            var updated = new List<FilterCriterion>(FilterScheme.Criteria);
+            updated.RemoveAt(index);
+            // Update parent reference
+        }
+    }
+
+    private void OnFieldChanged(int index, FilterDefinition? definition)
+    {
+        if (definition == null || index >= FilterScheme.Criteria.Count) return;
+
+        var criteria = FilterScheme.Criteria[index];
+        var updated = criteria with
+        {
+            FieldName = definition.FieldName,
+            Operator = definition.DefaultOperator,
+            Value = null,
+            ValueTo = null
+        };
+
+        UpdateCriterion(index, updated);
+    }
+
+    private void OnOperatorChanged(int index, MudExtendedFilterOperator op)
+    {
+        if (index >= FilterScheme.Criteria.Count) return;
+
+        var criteria = FilterScheme.Criteria[index];
+        UpdateCriterion(index, criteria with { Operator = op });
+    }
+
+    private void OnValueChanged(int index, object? value)
+    {
+        if (index >= FilterScheme.Criteria.Count) return;
+
+        var criteria = FilterScheme.Criteria[index];
+        UpdateCriterion(index, criteria with { Value = value });
+    }
+
+    private void OnValueToChanged(int index, object? value)
+    {
+        if (index >= FilterScheme.Criteria.Count) return;
+
+        var criteria = FilterScheme.Criteria[index];
+        UpdateCriterion(index, criteria with { ValueTo = value });
+    }
+
+    private void UpdateCriterion(int index, FilterCriterion criterion)
+    {
+        var updated = new List<FilterCriterion>(FilterScheme.Criteria);
+        if (index < updated.Count)
+        {
+            updated[index] = criterion;
+        }
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        await OnFiltersApplied.InvokeAsync(FilterScheme);
+    }
+
+    private void ResetFilters()
+    {
+        var reset = FilterScheme with { Criteria = [] };
+        // Update parent reference
+    }
+
+    private FilterDefinition? GetDefinition(string fieldName)
+    {
+        return FilterScheme.Definitions.FirstOrDefault(d => d.FieldName == fieldName);
+    }
+
+    private string GetOperatorLabel(MudExtendedFilterOperator op) => op switch
+    {
+        MudExtendedFilterOperator.Equals => Localization.GetString("Filter.Op.Equals"),
+        MudExtendedFilterOperator.NotEquals => Localization.GetString("Filter.Op.NotEquals"),
+        MudExtendedFilterOperator.Contains => Localization.GetString("Filter.Op.Contains"),
+        MudExtendedFilterOperator.StartsWith => Localization.GetString("Filter.Op.StartsWith"),
+        MudExtendedFilterOperator.EndsWith => Localization.GetString("Filter.Op.EndsWith"),
+        MudExtendedFilterOperator.GreaterThan => Localization.GetString("Filter.Op.GreaterThan"),
+        MudExtendedFilterOperator.LessThan => Localization.GetString("Filter.Op.LessThan"),
+        MudExtendedFilterOperator.Between => Localization.GetString("Filter.Op.Between"),
+        MudExtendedFilterOperator.In => Localization.GetString("Filter.Op.In"),
+        MudExtendedFilterOperator.IsEmpty => Localization.GetString("Filter.Op.IsEmpty"),
+        MudExtendedFilterOperator.IsNotEmpty => Localization.GetString("Filter.Op.IsNotEmpty"),
+        _ => op.ToString()
+    };
+}

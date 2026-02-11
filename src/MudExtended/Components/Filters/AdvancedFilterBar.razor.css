@@ -1,0 +1,40 @@
+.mudext-filter-bar {
+    margin-bottom: 1.5rem;
+}
+
+.mudext-filter-bar__criterion {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 4px;
+}
+
+.mudext-filter-bar__actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) {
+    .mudext-filter-bar__criterion {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .mudext-filter-bar__criterion {
+        grid-template-columns: 1fr;
+    }
+
+    .mudext-filter-bar__actions {
+        justify-content: stretch;
+    }
+
+    .mudext-filter-bar__actions button {
+        flex: 1;
+    }
+}

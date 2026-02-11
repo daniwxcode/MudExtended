@@ -1,0 +1,63 @@
+@using MudBlazor
+@using MudExtended.Models.Audit
+@using MudExtended.Services.Localization
+@typeparam TEntity
+
+<MudPaper Elevation="2" Class="mudext-audit-log">
+    <MudTable Items="@_auditEntries" Dense Hover>
+        <HeaderContent>
+            <MudTh>@Localization.GetString("AuditLog.User")</MudTh>
+            <MudTh>@Localization.GetString("AuditLog.Action")</MudTh>
+            <MudTh>@Localization.GetString("AuditLog.Timestamp")</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.UserName</MudTd>
+            <MudTd>
+                <MudChip T="string" Label="true" Color="@GetActionColor(context.Action)">
+                    @context.Action
+                </MudChip>
+            </MudTd>
+            <MudTd>@context.Timestamp.ToString("g")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.MoreVert"
+                               Size="Size.Small"
+                               OnClick="@(() => ShowDetailsAsync(context))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    [Inject]
+    private ILocalizationService Localization { get; set; } = default!;
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
+
+    /// <summary>
+    /// Audit entries to display.
+    /// </summary>
+    [Parameter]
+    public List<AuditEntry> AuditEntries { get; set; } = [];
+
+    private List<AuditEntry> _auditEntries = [];
+
+    protected override void OnParametersSet()
+    {
+        _auditEntries = AuditEntries.OrderByDescending(a => a.Timestamp).ToList();
+    }
+
+    private Color GetActionColor(string action) => action.ToLower() switch
+    {
+        "create" => Color.Success,
+        "update" => Color.Warning,
+        "delete" => Color.Error,
+        _ => Color.Info
+    };
+
+    private async Task ShowDetailsAsync(AuditEntry entry)
+    {
+        await Task.CompletedTask;
+    }
+}

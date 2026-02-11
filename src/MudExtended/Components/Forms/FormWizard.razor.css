@@ -1,0 +1,25 @@
+.mudext-wizard {
+    width: 100%;
+}
+
+.mudext-wizard__step-content {
+    padding: 1.5rem 0;
+    min-height: 300px;
+}
+
+.mudext-wizard__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .mudext-wizard__actions {
+        justify-content: stretch;
+    }
+
+    .mudext-wizard__actions button {
+        flex: 1;
+    }
+}
